@@ -1,6 +1,7 @@
 export const jobs = [
   {
     title: "Dispatch",
+    titleLink: "https://dispatchit.com",
     subtitle: "Senior Full-Stack Rails/React Engineer",
     dateRange: ["March 2022", "Present"],
     location: "Remote",
@@ -11,6 +12,7 @@ export const jobs = [
   },
   {
     title: "iFIT",
+    titleLink: "https://ifit.com",
     subtitle: "Lead Front-End Developer, DevX Manager",
     dateRange: ["2020", "2022"],
     location: "Remote",
@@ -22,6 +24,7 @@ export const jobs = [
   },
   {
     title: "iFIT",
+    titleLink: "https://ifit.com",
     subtitle: "Senior Front-End Developer",
     dateRange: ["2017", "2020"],
     location: "Remote",
@@ -34,6 +37,7 @@ export const jobs = [
   },
   {
     title: "Gyve",
+    titleLink: "https://gyve.com",
     subtitle: "Co-Founder, Technical Lead",
     dateRange: ["2016", "2018"],
     location: "Remote",
@@ -58,6 +62,7 @@ export const jobs = [
 export const schools = [
   {
     title: "Full Sail University",
+    titleLink: "https://fullsail.edu",
     subtitle: "Master of Fine Arts, Media Design",
     dateRange: ["Class of 2011"],
     location: "Remote",

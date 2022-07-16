@@ -1,5 +1,3 @@
-import React from "react";
-
 const KeyPoint = ({
   highlightEntries,
   title = "Default Title",
@@ -12,7 +10,15 @@ const KeyPoint = ({
 
     {entries.map(
       (
-        { title, subtitle, bullets, dateRange, location, suppressHighlight },
+        {
+          title,
+          subtitle,
+          titleLink,
+          bullets,
+          dateRange,
+          location,
+          suppressHighlight,
+        },
         index
       ) => {
         let highlightClass;
@@ -31,10 +37,23 @@ const KeyPoint = ({
                 )}
                 <h3 className="text-gray-400">{location}</h3>
               </div>
-              <h3 className="text-2xl font-normal">{title}</h3>
+              <h3 className="text-2xl font-normal">
+                {titleLink ? (
+                  <a
+                    href={titleLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline hover:no-underline"
+                  >
+                    {title}
+                  </a>
+                ) : (
+                  title
+                )}
+              </h3>
               <h4 className="text-2xl font-light">{subtitle}</h4>
             </div>
-            <ul>
+            <ul className="flex flex-col gap-2">
               {bullets.map((bullet, index) => (
                 <li key={index} className="font-light">
                   {bullet}
