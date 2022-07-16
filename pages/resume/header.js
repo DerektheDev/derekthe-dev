@@ -38,7 +38,7 @@ const contactItems = [
 ];
 
 const Header = () => (
-  <header className="grid pb-6 mt-12 mb-4 border-b-4 border-orange-400 gap-y-4 gap-x-12 grid-cols-1 md:grid-cols-[1fr_auto_1fr]">
+  <header className="grid pb-6 mb-4 border-b-4 border-orange-400 gap-y-4 gap-x-12 grid-cols-1 md:grid-cols-[1fr_auto_1fr]">
     <section className="flex flex-col gap-2 text-center md:text-left">
       <div className="relative">
         <div className="md:border-l-[30px] border-orange-400 h-full absolute -ml-12" />

@@ -6,8 +6,8 @@ const KeyPoint = ({
   subtitle,
   entries = [],
 }) => (
-  <div className="mb-6">
-    <h2 className="text-3xl font-normal mb-4">{title}</h2>
+  <div className="flex flex-col justify-between gap-6 only:h-full">
+    <h2 className="text-3xl font-normal">{title}</h2>
     {subtitle && <h3 className="text-2xl font-semibold">{subtitle}</h3>}
 
     {entries.map(
@@ -22,7 +22,7 @@ const KeyPoint = ({
         }
 
         return (
-          <div key={index} className="mb-8">
+          <div key={index} className="flex flex-col gap-2">
             <div className="relative">
               <div className={highlightClass} />
               <div className="flex justify-between text-base font-light">
@@ -32,11 +32,11 @@ const KeyPoint = ({
                 <h3 className="text-gray-400">{location}</h3>
               </div>
               <h3 className="text-2xl font-normal">{title}</h3>
-              <h4 className="text-2xl font-light mb-2">{subtitle}</h4>
+              <h4 className="text-2xl font-light">{subtitle}</h4>
             </div>
             <ul>
               {bullets.map((bullet, index) => (
-                <li key={index} className="mb-2 font-light">
+                <li key={index} className="font-light">
                   {bullet}
                 </li>
               ))}
