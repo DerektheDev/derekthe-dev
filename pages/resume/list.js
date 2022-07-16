@@ -7,7 +7,7 @@ const List = ({ title = "Default", entries = [] }) => {
   return (
     <div>
       <h2 className="text-3xl font-normal mb-2">{title}</h2>
-      <ul className="mb-4 grid grid-cols-2 gap-4 font-light">
+      <ul className="mb-4 grid grid-cols-1 gap-x-4 font-light md:grid-cols-2">
         {[firstHalf, secondHalf].map((entries, halfIndex) => {
           return (
             <div key={halfIndex}>

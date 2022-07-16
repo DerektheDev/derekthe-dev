@@ -1,13 +1,14 @@
 import List from "./list";
+import ShortList from "./short-list";
 import KeyPoint from "./key-point";
 import { jobs, schools, skills, built, brands, interests } from "./data";
 import Header from "./header";
 
 export default function Resume() {
   return (
-    <main className="max-w-screen-lg m-auto">
+    <main className="max-w-screen-lg m-auto px-6 md:px-12">
       <Header />
-      <section className="grid grid-cols-2 gap-10">
+      <section className="grid gap-x-10 gap-y-4 grid-cols-1 md:grid-cols-2">
         <div className="shrink-0">
           <KeyPoint
             title="Recent Work Experience"
@@ -20,7 +21,7 @@ export default function Resume() {
           <List title="Skills & Competencies" entries={skills} />
           <List title="What I've Built" entries={built} />
           <List title="Brands Served" entries={brands} />
-          <List title="Interests" entries={interests} />
+          <ShortList title="Interests" entries={interests} />
         </div>
       </section>
     </main>
