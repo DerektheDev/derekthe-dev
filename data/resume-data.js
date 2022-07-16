@@ -81,30 +81,29 @@ export const brands = [
 ];
 
 export const built = [
-  "Content management systems",
-  "Real-time video conferencing",
   "Design systems and component libraries",
-  "Telephony & SMS/MMS systems",
+  "Telephony & SMS/MMS systems (Twilio)",
+  "WebRTC real-time video conferencing",
   "Mobile apps",
-  "Gmaps integration",
+  "Maps integrations",
   "Search algorithms",
   "Charting and graphing",
   "Workflow tools",
   "RESTful APIs",
   "Payment systems",
+  "Complex reporting & data aggregation systems",
 ];
 
 export const interests = ["Church", "Family", "Video gaming", "Rowing", "Tech"];
 
 export const skills = [
   "Full digital product lifecycle leadership",
+  "People leadership",
   "Semantic, well-structured, scalable code",
   "UI / UX best practices",
-  "Rich internet applications",
-  "Productive remote culture",
-  "Microservice architecture",
   "Code reviews",
   "Unix & servers",
+  "RESTful service architecture",
   "Data visualization",
   "Performance optimization",
   "Web accessibility",

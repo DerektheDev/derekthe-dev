@@ -7,19 +7,19 @@ const List = ({ title = "Default", entries = [] }) => {
   return (
     <div>
       <h2 className="text-3xl font-normal mb-2">{title}</h2>
-      <ul className="grid grid-cols-1 gap-x-4 font-light md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-4 font-light md:grid-cols-2">
         {[firstHalf, secondHalf].map((entries, halfIndex) => {
           return (
-            <div key={halfIndex}>
+            <ul key={halfIndex} className="flex flex-col gap-y-2">
               {entries.map((entry, i) => (
-                <li key={i} className="mb-2 leading-5">
+                <li key={i} className="leading-5">
                   {entry}
                 </li>
               ))}
-            </div>
+            </ul>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 };
