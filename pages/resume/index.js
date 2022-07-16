@@ -1,7 +1,14 @@
 import List from "./list";
 import ShortList from "./short-list";
 import KeyPoint from "./key-point";
-import { jobs, schools, skills, built, brands, interests } from "./data";
+import {
+  jobs,
+  schools,
+  skills,
+  built,
+  brands,
+  interests,
+} from "../../data/resume-data";
 import Header from "./header";
 
 export default function Resume() {
