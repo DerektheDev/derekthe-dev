@@ -61,13 +61,15 @@ const Header = () => (
         />
       </div>
     </div>
-    <nav className="md:text-right font-light">
-      <ul className="h-full flex flex-col justify-between">
+    <nav className="md:text-right font-light justify-self-center md:justify-self-end">
+      <ul className="h-full flex flex-col justify-between align-start gap-2">
         {contactItems.map(({ text, link, icon }) => (
-          <li
-            key={text}
-            className="flex gap-4 justify-center md:justify-end items-center"
-          >
+          <li key={text} className="flex gap-4 md:justify-end items-center">
+            <FontAwesomeIcon
+              icon={icon}
+              style={iconStyle}
+              className="md:order-2"
+            />
             <span>
               {link ? (
                 <a href={link} className="underline hover:no-underline">
@@ -77,7 +79,6 @@ const Header = () => (
                 text
               )}
             </span>
-            <FontAwesomeIcon icon={icon} style={iconStyle} />
           </li>
         ))}
       </ul>
