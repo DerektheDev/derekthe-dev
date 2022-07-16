@@ -1,5 +1,3 @@
-import React from "react";
-
 const List = ({ title = "Default", entries = [] }) => {
   const firstHalf = entries.slice(0, Math.floor(entries.length / 2));
   const secondHalf = entries.slice(Math.floor(entries.length / 2));
