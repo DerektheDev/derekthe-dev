@@ -5,7 +5,7 @@ const List = ({ title = "Default", entries = [] }) => {
   return (
     <div>
       <h2 className="text-3xl font-normal mb-2">{title}</h2>
-      <div className="grid grid-cols-1 gap-x-4 font-light md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-2 font-light md:grid-cols-2">
         {[firstHalf, secondHalf].map((entries, halfIndex) => {
           return (
             <ul key={halfIndex} className="flex flex-col gap-y-2">
