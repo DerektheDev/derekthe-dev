@@ -8,6 +8,7 @@ import {
   built,
   brands,
   interests,
+  proficiencies
 } from "../../data/resume-data";
 import Header from "./header";
 
@@ -25,6 +26,7 @@ export default function Resume() {
         </div>
         <div className="shrink-0 flex flex-col gap-6 justify-between">
           <KeyPoint title="Education" entries={schools} />
+          <ShortList title="Tech" entries={proficiencies} />
           <List title="Skills & Competencies" entries={skills} />
           <List title="What I've Built" entries={built} />
           <List title="Brands Served" entries={brands} />

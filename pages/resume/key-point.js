@@ -35,7 +35,7 @@ const KeyPoint = ({
                 {dateRange && (
                   <h3 className="text-orange-400">{dateRange.join(" - ")}</h3>
                 )}
-                <h3 className="text-gray-400">{location}</h3>
+                {/* <h3 className="text-gray-400">{location}</h3> */}
               </div>
               <h3 className="text-2xl font-normal">
                 {titleLink ? (

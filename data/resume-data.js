@@ -1,12 +1,24 @@
 export const jobs = [
   {
+    title: "O'Reilly Media",
+    titleLink: "https://oreilly.com",
+    subtitle: "Senior Front-End Engineer",
+    // dateRange: ["January 2023", "Present"],
+    dateRange: ["2023"],
+    location: "Remote",
+    bullets: [
+      "Feature-building for O'Reilly's online learning platform, which serves millions of users",
+    ]
+  },
+  {
     title: "Dispatch",
     titleLink: "https://dispatchit.com",
     subtitle: "Senior Full-Stack Rails/React Engineer",
-    dateRange: ["March 2022", "Present"],
+    // dateRange: ["March 2022", "December 2022"],
+    dateRange: ["2022"],
     location: "Remote",
     bullets: [
-      "Feature-building for Dispatch Connect, a logistics platform used by organizations to manage their own fleet",
+      "Feature-built for Dispatch Connect, a logistics platform used by organizations to manage their own fleet",
       "Route planning, optimization, and visualization; real-time ETAs; status notifications; driver insights and comms",
     ],
   },
@@ -19,12 +31,12 @@ export const jobs = [
     bullets: [
       "Served fifteen individual contributors as people leader of the Front-End Development department of iFIT",
       "Communicated regularly with project and team leads to cultivate a consistently high-performing FED force",
-      "Ensured iFIT served the needs of its people in personal growth as much as they support the company in its goals",
+      // "Ensured iFIT served the needs of its people in personal growth as much as they support the company in its goals",
     ],
   },
   {
-    title: "iFIT",
-    titleLink: "https://ifit.com",
+    // title: "iFIT",
+    // titleLink: "https://ifit.com",
     subtitle: "Senior Front-End Developer",
     dateRange: ["2017", "2020"],
     location: "Remote",
@@ -32,7 +44,7 @@ export const jobs = [
     bullets: [
       "Developed training to introduce team to new web APIs (e.g. IntersectionObserver, CSS Grid, WebAssembly), debugging tools, and lawful and empathic web accessibility",
       "Mentored junior developers in first steps into coding for the web platform",
-      "Directed a performance spike, resulting in tangible improvements in load time and interface responsiveness",
+      // "Directed a performance spike, resulting in tangible improvements in load time and interface responsiveness",
     ],
   },
   {
@@ -43,7 +55,7 @@ export const jobs = [
     location: "Remote",
     bullets: [
       "Lead developer for API architecture, banking network integration, payment processing, security, cron systems, Twilio integration, and admin portal",
-      "Technical liaison to multiple 3rd party payment facilitators",
+      // "Technical liaison to multiple 3rd party payment facilitators",
       "Laid foundation for a growing and thriving company",
     ],
   },
@@ -99,7 +111,7 @@ export const built = [
   "Complex reporting & data aggregation systems",
 ];
 
-export const interests = ["Church", "Family", "Video gaming", "Rowing", "Tech"];
+export const interests = ["Church", "Family", "Video gaming", "Taekwondo", "Tech"];
 
 export const skills = [
   "Full digital product lifecycle leadership",
@@ -115,3 +127,17 @@ export const skills = [
   "Unit/integration testing",
   "Data security & PCI compliance",
 ];
+
+export const proficiencies = [
+  "HTML",
+  "CSS",
+  "JavaScript",
+  "React",
+  "Ruby on Rails",
+  "SQL",
+  "React Native",
+  "Node.js",
+  "TypeScript",
+  "Web Accessibility",
+];
+
