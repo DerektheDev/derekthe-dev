@@ -46,7 +46,7 @@ const Header = () => (
       </div>
       <p className="font-light">
         Partnering with high-standards individuals to build beautiful,
-        performant, and exciting software with humans in mind.
+        performant, accessible, and exciting software with humans in mind.
       </p>
     </section>
     <div className="flex justify-center items-center">

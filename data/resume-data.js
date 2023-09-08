@@ -8,6 +8,7 @@ export const jobs = [
     location: "Remote",
     bullets: [
       "Feature-building for O'Reilly's online learning platform, which serves millions of users",
+      "Wrote a proposal and drafted wireframes for a generative AI project, and presented to Project, Product, and Engineering leadership",
     ]
   },
   {
