@@ -247,7 +247,7 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 28px;
+          gap: 14px;
           flex-wrap: wrap;
         }
         .tech-item {
@@ -441,7 +441,7 @@ export default function Home() {
           </p>
 
           {/* Tech stack */}
-          <div className="rise d5 tech-row mb-10">
+          <div className="rise d5 tech-row my-9">
             {techStack.map(({ label, iconUrl, faIcon }) => (
               <span key={label} className="tech-item">
                 {iconUrl
