@@ -7,14 +7,15 @@ import {
   skills,
   built,
   brands,
-  interests,
-  proficiencies
+  // interests,
+  proficiencies,
+  industries,
 } from "../../data/resume-data";
 import Header from "./header";
 
 export default function Resume() {
   return (
-    <main className="max-w-screen-lg mx-auto my-12 px-6 md:px-12">
+    <main className="max-w-screen-lg mx-auto px-6 md:px-12 mt-12 screen:my-12">
       <Header />
       <section className="grid gap-x-10 gap-y-4 grid-cols-1 md:grid-cols-2">
         <div className="shrink-0 flex flex-col gap-6 justify-between">
@@ -30,7 +31,8 @@ export default function Resume() {
           <List title="Skills & Competencies" entries={skills} />
           <List title="What I've Built" entries={built} />
           <List title="Brands Served" entries={brands} />
-          <ShortList title="Interests" entries={interests} />
+          <List title="Industries Served" entries={industries} />
+          {/* <ShortList title="Interests" entries={interests} /> */}
         </div>
       </section>
     </main>
