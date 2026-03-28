@@ -8,14 +8,13 @@ import { faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
 const techStack = [
   { label: "Rails",     iconUrl: "https://cdn.simpleicons.org/rubyonrails/fb923c" },
   { label: "React",     iconUrl: "https://cdn.simpleicons.org/react/fb923c" },
-  { label: "AI",        faIcon: faBrain },
   { label: "Front-End", iconUrl: "https://cdn.simpleicons.org/html5/fb923c" },
+  { label: "AI",        faIcon: faBrain },
 ];
-import derek from "../public/derek-2019.jpg";
+import derek from "../public/derek-linkedin.jpg";
 
 const contactLinks = [
   { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faPaperPlane },
-  { href: "https://www.linkedin.com/in/derekthedev/", label: "/in/derekthedev", icon: faLinkedinIn },
   { href: "tel:13098400133", label: "309.840.0133", icon: faMobile },
 ];
 
@@ -255,14 +254,14 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 7px;
-          font-size: 13px;
+          font-size: 16px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: #9ca3af;
+          color: #e5e7eb;
         }
         .tech-item img {
-          width: 15px;
-          height: 15px;
+          width: 18px;
+          height: 18px;
           opacity: 0.75;
         }
         .tech-item .fa-brain {
@@ -309,19 +308,37 @@ export default function Home() {
           65%     { transform: translate(40px,   50px)  scale(0.9); }
         }
 
-        /* Photo ring */
+        /* Photo ring + heat corona */
         .photo-ring {
           box-shadow:
             0 0 0 3px var(--bg),
             0 0 0 5px var(--orange),
-            0 0 48px rgba(251, 146, 60, 0.22);
+            0 0 28px 4px rgba(251,146,60,0.4),
+            0 0 55px 10px rgba(234,88,12,0.18);
+          animation: coronaHeat 16s ease-in-out infinite;
+        }
+        @keyframes coronaHeat {
+          0%   { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 16px 2px  rgba(251,146,60,0.18), 0 0 32px 5px  rgba(234,88,12,0.08); }
+          7%   { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 26px 5px  rgba(251,146,60,0.28), 0 0 50px 10px rgba(234,88,12,0.13); }
+          13%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 18px 2px  rgba(251,146,60,0.20), 0 0 36px 6px  rgba(234,88,12,0.09); }
+          22%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 22px 3px  rgba(251,146,60,0.24), 0 0 42px 7px  rgba(234,88,12,0.11); }
+          31%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 14px 1px  rgba(251,146,60,0.15), 0 0 28px 4px  rgba(234,88,12,0.07); }
+          38%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 30px 6px  rgba(251,146,60,0.32), 0 0 56px 12px rgba(234,88,12,0.15); }
+          47%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 20px 3px  rgba(251,146,60,0.22), 0 0 38px 7px  rgba(234,88,12,0.10); }
+          55%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 25px 4px  rgba(251,146,60,0.27), 0 0 46px 9px  rgba(234,88,12,0.12); }
+          61%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 15px 2px  rgba(251,146,60,0.17), 0 0 30px 5px  rgba(234,88,12,0.08); }
+          72%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 24px 4px  rgba(251,146,60,0.26), 0 0 44px 8px  rgba(234,88,12,0.12); }
+          83%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 17px 2px  rgba(251,146,60,0.19), 0 0 34px 5px  rgba(234,88,12,0.09); }
+          91%  { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 28px 5px  rgba(251,146,60,0.30), 0 0 52px 11px rgba(234,88,12,0.14); }
+          100% { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--orange), 0 0 16px 2px  rgba(251,146,60,0.18), 0 0 32px 5px  rgba(234,88,12,0.08); }
         }
 
         /* Buttons */
         .btn-fill {
           background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
-          color: #111;
-          font-weight: 600;
+          color: #5a2000;
+          font-weight: 700;
+          text-shadow: 0 1px 1px rgba(255,160,60,0.6);
           position: relative;
           overflow: hidden;
           transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.18s ease, filter 0.18s ease;
@@ -381,7 +398,7 @@ export default function Home() {
 
         {/* Nav */}
         <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]">
-          {[["Resume", "/resume"], ["GitHub", "https://github.com/derekthedev"], ["Contact", "mailto:derekthedev@icloud.com"]].map(([label, href]) => (
+          {[["Resume", "/resume"], ["LinkedIn", "https://www.linkedin.com/in/derekthedev/"], ["GitHub", "https://github.com/derekthedev"]].map(([label, href]) => (
             <a key={label} href={href}
               className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors">
               {label}
@@ -401,12 +418,14 @@ export default function Home() {
         <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
 
           {/* Photo */}
-          <div className="rise d2 mx-auto mb-10 w-[116px] h-[116px] rounded-full overflow-hidden photo-ring">
-            <Image src={derek} alt="Derek Montgomery" width={116} height={116} className="object-cover w-full h-full" priority />
+          <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
+            <div className="w-full h-full rounded-full overflow-hidden photo-ring">
+              <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
+            </div>
           </div>
 
           {/* Eyebrow */}
-          <p className="rise d3 text-[11px] text-orange-400 tracking-[0.45em] uppercase mb-3">
+          <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
             Hey, I'm
           </p>
 
@@ -418,7 +437,7 @@ export default function Home() {
           {/* Subtitle */}
           <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
             Senior Software Engineer at{" "}
-            <span className="text-gray-200 font-medium">O'Reilly Media</span>
+            <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
           </p>
 
           {/* Tech stack */}
@@ -434,23 +453,26 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Bio */}
+          <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
+            With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
+            <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
+            <span className="text-gray-200 font-medium">building startups</span>, and{" "}
+            <span className="text-gray-200 font-medium">consulting for large corporations</span>.
+          </p>
+
           {/* CTAs */}
           <div className="rise d6 flex gap-4 justify-center">
             <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
               View Resume
-            </a>
-            <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
-              className="btn-outline text-[15px] px-8 py-3 rounded-lg tracking-wide flex items-center gap-2.5">
-              <FontAwesomeIcon icon={faLinkedinIn} className="w-4 h-4" />
-              LinkedIn
             </a>
           </div>
         </section>
         </div>
 
         {/* Contact */}
-        <section className="relative z-10 max-w-4xl mx-auto px-6 py-16 text-center">
-          <p className="text-sm uppercase tracking-[3px] text-gray-500 mb-8">
+        <section className="relative z-10 max-w-4xl mx-auto px-6 py-8 text-center">
+          <p className="text-[17px] uppercase tracking-[3px] text-gray-400 mb-4">
             Get in Touch
           </p>
           <div className="flex gap-10 justify-center items-center">
