@@ -1,5 +1,5 @@
 import Image from "next/image";
-import derek from "../../public/derek-2019.jpg";
+import derek from "../../public/derek-linkedin.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPaperPlane,
