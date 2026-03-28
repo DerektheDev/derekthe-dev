@@ -62,6 +62,7 @@ export const jobs = [
   },
   {
     title: "Marketplace Homes",
+    titleLink: "https://marketplacehomes.com/",
     subtitle: "Lead Developer",
     dateRange: ["2015"],
     location: "Remote",
