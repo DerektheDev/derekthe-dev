@@ -16,8 +16,8 @@ const iconStyle = {
 
 const contactItems = [
   {
-    text: "hello@derekthe.dev",
-    link: "mailto:hello@derekthe.dev",
+    text: "derekthedev@icloud.com",
+    link: "mailto:derekthedev@icloud.com",
     icon: faPaperPlane,
   },
   {
