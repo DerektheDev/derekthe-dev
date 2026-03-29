@@ -183,103 +183,59 @@ function NeuralBackground() {
     let animId;
 
     const resize = () => {
-      canvas.width = canvas.offsetWidth;
+      canvas.width  = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      // Repaint background on resize to avoid blank flash
-      ctx.fillStyle = "#1a1a1a";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    // Warm amber/orange palette matching the site
-    const palette = [
-      [251, 146,  60, 0.55],  // orange-400
-      [234,  88,  12, 0.50],  // orange-600
-      [249, 115,  22, 0.52],  // orange-500
-      [253, 186, 116, 0.42],  // orange-300 soft
-      [255, 220, 140, 0.32],  // golden haze
-      [180,  50,  10, 0.48],  // deep amber
-      [200,  80,  20, 0.45],  // burnt sienna
+    // Each node drifts on an independent Lissajous path.
+    // px/py = phase offset, fx/fy = frequency, ax/ay = amplitude (fraction of W/H).
+    // color = [r,g,b], a = peak alpha, rf = radius as fraction of canvas diagonal.
+    const nodes = [
+      { px:0.00, py:0.00, fx:0.31, fy:0.27, ax:0.38, ay:0.32, color:[251,146, 60], a:0.58, rf:0.62 },
+      { px:1.20, py:0.80, fx:0.19, fy:0.23, ax:0.44, ay:0.38, color:[234, 88, 12], a:0.52, rf:0.66 },
+      { px:2.40, py:1.60, fx:0.37, fy:0.31, ax:0.32, ay:0.44, color:[249,115, 22], a:0.50, rf:0.56 },
+      { px:3.60, py:2.40, fx:0.25, fy:0.41, ax:0.48, ay:0.28, color:[253,186,116], a:0.40, rf:0.70 },
+      { px:0.50, py:3.20, fx:0.43, fy:0.17, ax:0.40, ay:0.46, color:[180, 50, 10], a:0.54, rf:0.64 },
+      { px:1.80, py:0.40, fx:0.22, fy:0.38, ax:0.45, ay:0.34, color:[200, 80, 20], a:0.47, rf:0.60 },
+      { px:4.20, py:1.00, fx:0.34, fy:0.29, ax:0.35, ay:0.40, color:[255,160, 50], a:0.44, rf:0.68 },
+      { px:2.90, py:4.50, fx:0.28, fy:0.35, ax:0.42, ay:0.32, color:[160, 40,  5], a:0.50, rf:0.58 },
+      { px:0.90, py:2.10, fx:0.39, fy:0.22, ax:0.36, ay:0.42, color:[230,100, 30], a:0.45, rf:0.54 },
     ];
-
-    // Composite sine-wave flow field — produces swirling, aurora-like paths
-    function flowAngle(x, y, t) {
-      const nx = x / (canvas.width  || 1);
-      const ny = y / (canvas.height || 1);
-      return (
-        Math.sin(nx * 4   + t * 0.70) * Math.cos(ny * 3   - t * 0.50) * Math.PI * 1.5 +
-        Math.sin(nx * 7   - ny * 5   + t * 0.35) * Math.PI * 0.60 +
-        Math.cos(nx * 2.5 + ny * 4   + t * 0.55) * Math.PI * 0.80
-      );
-    }
-
-    const PARTICLE_COUNT = 420;
-    const mkParticle = () => {
-      const c = palette[Math.floor(Math.random() * palette.length)];
-      return {
-        x:      Math.random() * canvas.width,
-        y:      Math.random() * canvas.height,
-        vx:     0,
-        vy:     0,
-        age:    Math.random() * 200,          // stagger initial ages
-        maxAge: 220 + Math.random() * 300,
-        speed:  0.55 + Math.random() * 1.65,
-        size:   0.35 + Math.random() * 1.90,
-        color:  c,
-      };
-    };
-
-    const particles = Array.from({ length: PARTICLE_COUNT }, mkParticle);
-
-    // Seed the canvas with the background color so trails fade correctly
-    ctx.fillStyle = "#1a1a1a";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     let t = 0;
 
     const draw = () => {
-      t += 0.003;
+      t += 0.004;
 
-      // Semi-transparent veil fades old trail segments each frame
-      ctx.fillStyle = "rgba(26,26,26,0.13)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const W = canvas.width;
+      const H = canvas.height;
+      const diag = Math.sqrt(W * W + H * H);
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // Clear to base background each frame — no trails, pure mesh
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(0, 0, W, H);
 
-        const angle = flowAngle(p.x, p.y, t);
-        p.vx = p.vx * 0.88 + Math.cos(angle) * p.speed * 0.12;
-        p.vy = p.vy * 0.88 + Math.sin(angle) * p.speed * 0.12;
+      nodes.forEach(n => {
+        // Smooth Lissajous position
+        const cx = W * 0.5 + W * n.ax * Math.sin(n.fx * t + n.px);
+        const cy = H * 0.5 + H * n.ay * Math.cos(n.fy * t + n.py);
+        const r  = diag * n.rf;
 
-        const px = p.x;
-        const py = p.y;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.age++;
+        const [cr, cg, cb] = n.color;
+        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grd.addColorStop(0,    `rgba(${cr},${cg},${cb},${n.a})`);
+        grd.addColorStop(0.35, `rgba(${cr},${cg},${cb},${(n.a * 0.55).toFixed(3)})`);
+        grd.addColorStop(0.70, `rgba(${cr},${cg},${cb},${(n.a * 0.18).toFixed(3)})`);
+        grd.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
 
-        // Smooth fade-in / fade-out over particle lifetime
-        const life = p.age / p.maxAge;
-        const fade = life < 0.1 ? life / 0.1 : life > 0.8 ? 1 - (life - 0.8) / 0.2 : 1;
-
-        const [r, g, b, baseA] = p.color;
         ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(p.x, p.y);
-        ctx.strokeStyle = `rgba(${r},${g},${b},${fade * baseA})`;
-        ctx.lineWidth = p.size * (0.45 + fade * 0.55);
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        // Recycle particle when expired or it drifts off-canvas
-        if (
-          p.age > p.maxAge ||
-          p.x < -20 || p.x > canvas.width  + 20 ||
-          p.y < -20 || p.y > canvas.height + 20
-        ) {
-          Object.assign(p, mkParticle());
-        }
-      }
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+      });
 
       animId = requestAnimationFrame(draw);
     };
@@ -295,7 +251,7 @@ function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}
     />
   );
 }
@@ -564,12 +520,7 @@ export default function Home() {
         {/* Hero */}
         <div className="relative">
           <NeuralBackground />
-          <div className="mesh-bg">
-            <div className="blob" style={{ width:520, height:520, top:'5%',  left:'20%', background:'rgba(251,146,60,0.22)', animation:'b1 14s ease-in-out infinite' }} />
-            <div className="blob" style={{ width:400, height:400, top:'30%', left:'55%', background:'rgba(234,88,12,0.18)',  animation:'b2 18s ease-in-out infinite' }} />
-            <div className="blob" style={{ width:460, height:360, top:'50%', left:'10%', background:'rgba(249,115,22,0.15)', animation:'b3 22s ease-in-out infinite' }} />
-            <div className="blob" style={{ width:340, height:340, top:'10%', left:'65%', background:'rgba(180,50,10,0.18)',  animation:'b4 16s ease-in-out infinite' }} />
-          </div>
+          {/* mesh-bg blobs replaced by canvas mesh gradient */}
         <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
 
           {/* Photo */}
