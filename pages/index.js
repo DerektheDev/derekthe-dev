@@ -128,10 +128,10 @@ function NeuralBackground() {
       // Advance rotation — device-driven on mobile, auto-drift on desktop
       if (orient.active) {
         // Map tilt deltas (degrees) to target angles (radians), then lerp smoothly
-        const targetY =  (orient.gamma / 45) * 0.7;   // left/right tilt → Y rotation
-        const targetX = -(orient.beta  / 45) * 0.35;  // forward/back tilt → X rotation
-        angleY += (targetY - angleY) * 0.06;
-        angleX += (targetX - angleX) * 0.06;
+        const targetY =  (orient.gamma / 30) * 1.8;   // left/right tilt → Y rotation
+        const targetX = -(orient.beta  / 30) * 0.9;  // forward/back tilt → X rotation
+        angleY += (targetY - angleY) * 0.1;
+        angleX += (targetX - angleX) * 0.1;
       } else {
         angleY += 0.0018;
         angleX += 0.0007;
