@@ -24,7 +24,7 @@ const projects = [
   },
   {
     name: "Gyve",
-    description: "Generosity platform helping churches and charities collect and manage donations.",
+    description: "Generosity platform for churches and charities.",
     tags: ["Rails", "React"],
     accent: "linear-gradient(135deg, #1a0a00 0%, #3d1500 100%)",
     url: "https://www.gyve.com",
@@ -103,7 +103,8 @@ function WorkCards() {
             opacity: 0,
             transform: 'translateY(20px)',
             transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.1}s`,
-            display: 'block',
+            display: 'flex',
+            flexDirection: 'column',
             textDecoration: 'none',
             color: 'inherit',
           };
@@ -148,8 +149,8 @@ function WorkCards() {
                 </div>
               </div>
               {/* Card body */}
-              <div style={{ padding: '12px 14px' }}>
-                <p style={{ fontSize: 14, color: '#aaa', lineHeight: 1.55, marginBottom: 10 }}>
+              <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <p style={{ fontSize: 14, color: '#aaa', lineHeight: 1.55, marginBottom: 10, flex: 1 }}>
                   {p.description}
                 </p>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
