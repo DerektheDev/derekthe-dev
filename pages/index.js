@@ -23,6 +23,7 @@ function useScrollProgress() {
   useEffect(() => {
     let rafId;
     const onScroll = () => {
+      cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         const el = document.documentElement;
         const scrolled = el.scrollTop || document.body.scrollTop;
