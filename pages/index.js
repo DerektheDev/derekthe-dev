@@ -57,221 +57,9 @@ function useScrollProgress() {
   return progress;
 }
 
-function useCursor() {
-  const dotRef = useRef(null);
-  const ringRef = useRef(null);
-  const pos = useRef({ x: -100, y: -100 });
-  const ringPos = useRef({ x: -100, y: -100 });
-  const rafId = useRef(null);
-  const dotScale = useRef(1);
 
-  useEffect(() => {
-    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener('mousemove', onMove);
 
-    const loop = () => {
-      if (dotRef.current) {
-        dotRef.current.style.transform =
-          `translate(${pos.current.x - 5}px, ${pos.current.y - 5}px) scale(${dotScale.current})`;
-      }
-      ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.12;
-      ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.12;
-      if (ringRef.current) {
-        ringRef.current.style.transform =
-          `translate(${ringPos.current.x - 18}px, ${ringPos.current.y - 18}px)`;
-      }
-      rafId.current = requestAnimationFrame(loop);
-    };
-    rafId.current = requestAnimationFrame(loop);
 
-    const onEnter = () => {
-      dotScale.current = 1.6;
-      if (ringRef.current) {
-        ringRef.current.style.width = '48px';
-        ringRef.current.style.height = '48px';
-        ringRef.current.style.background = 'rgba(251,146,60,0.08)';
-      }
-    };
-    const onLeave = () => {
-      dotScale.current = 1;
-      if (ringRef.current) {
-        ringRef.current.style.width = '36px';
-        ringRef.current.style.height = '36px';
-        ringRef.current.style.background = 'transparent';
-      }
-    };
-
-    const interactiveEls = Array.from(document.querySelectorAll('a, button'));
-    interactiveEls.forEach(el => {
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mouseleave', onLeave);
-    });
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(rafId.current);
-      interactiveEls.forEach(el => {
-        el.removeEventListener('mouseenter', onEnter);
-        el.removeEventListener('mouseleave', onLeave);
-      });
-    };
-  }, []);
-
-  return { dotRef, ringRef };
-}
-
-function useMagnetic(strength = 0.35) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const onMove = (e) => {
-      const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const RADIUS = 70;
-      if (dist < RADIUS) {
-        const tx = dx * strength;
-        const ty = dy * strength;
-        el.style.transform = `translate(${tx}px, ${ty}px)`;
-      } else {
-        el.style.transform = 'translate(0px, 0px)';
-      }
-    };
-
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, [strength]);
-
-  return ref;
-}
-
-function useParallax(factor) {
-  const ref = useRef(null);
-  const target = useRef({ x: 0, y: 0 });
-  const current = useRef({ x: 0, y: 0 });
-  const rafId = useRef(null);
-
-  useEffect(() => {
-    const onMove = (e) => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      target.current = {
-        x: (e.clientX - cx) * factor,
-        y: (e.clientY - cy) * factor,
-      };
-    };
-    window.addEventListener('mousemove', onMove);
-
-    const loop = () => {
-      current.current.x += (target.current.x - current.current.x) * 0.08;
-      current.current.y += (target.current.y - current.current.y) * 0.08;
-      if (ref.current) {
-        ref.current.style.transform =
-          `translate(${current.current.x}px, ${current.current.y}px)`;
-      }
-      rafId.current = requestAnimationFrame(loop);
-    };
-    rafId.current = requestAnimationFrame(loop);
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(rafId.current);
-    };
-  }, [factor]);
-
-  return ref;
-}
-
-function useCountUp(target, duration = 1200) {
-  const [value, setValue] = useState(0);
-  const triggered = useRef(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (target === '∞') { setValue('∞'); return; }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !triggered.current) {
-          triggered.current = true;
-          const start = performance.now();
-          const tick = (now) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setValue(Math.round(eased * target));
-            if (progress < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.4 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target, duration]);
-
-  return { value, ref };
-}
-
-function StatsStrip() {
-  const years    = useCountUp(15, 1200);
-  const ventures = useCountUp(3,  900);
-  const coffees  = useCountUp('∞');
-
-  const stats = [
-    { countHook: years,    suffix: '+', label: 'Years' },
-    { countHook: ventures, suffix: '+', label: 'Ventures' },
-    { countHook: coffees,  suffix: '',  label: 'Coffees' },
-  ];
-
-  return (
-    <div
-      ref={years.ref}
-      className="relative z-10 max-w-3xl mx-auto px-6 py-10"
-    >
-      {/* Top divider */}
-      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 0 }}>
-        {stats.map(({ countHook, suffix, label }, i) => (
-          <div key={label} style={{
-            textAlign: 'center',
-            padding: '0 2.5rem',
-            borderRight: i < stats.length - 1 ? '1px solid #2a2a2a' : 'none',
-          }}>
-            <div style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 'clamp(40px, 7vw, 64px)',
-              lineHeight: 1,
-              color: '#fb923c',
-              letterSpacing: '0.02em',
-            }}>
-              {countHook.value}{suffix}
-            </div>
-            <div style={{
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: '#555',
-              marginTop: 6,
-            }}>
-              {label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom divider */}
-      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)', marginTop: '2rem' }} />
-    </div>
-  );
-}
 
 function WorkCards() {
   const sectionRef = useRef(null);
@@ -372,7 +160,7 @@ function WorkCards() {
   );
 }
 
-function NeuralBackground({ cursorPosRef }) {
+function NeuralBackground() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -461,27 +249,6 @@ function NeuralBackground({ cursorPosRef }) {
         if (Math.abs(n.lz) > bz) n.vz *= -1;
       });
 
-      // Cursor repulsion
-      const cp = cursorPosRef?.current;
-      if (cp && cp.x > 0) {
-        nodes.forEach(n => {
-          const p = project(n.lx, n.ly, n.lz);
-          if (!p) return;
-          const dx = p.sx - cp.x;
-          const dy = p.sy - cp.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const REPEL_RADIUS = 120;
-          if (dist < REPEL_RADIUS && dist > 0) {
-            const force = (1 - dist / REPEL_RADIUS) * 1.8;
-            n.vx += (dx / dist) * force * 0.04;
-            n.vy += (dy / dist) * force * 0.04;
-          }
-          // Decay back toward natural speed
-          n.vx *= 0.96;
-          n.vy *= 0.96;
-        });
-      }
-
       // Project all nodes once
       const projected = nodes.map(n => project(n.lx, n.ly, n.lz));
 
@@ -563,18 +330,6 @@ function NeuralBackground({ cursorPosRef }) {
 
 export default function Home() {
   const scrollProgress = useScrollProgress();
-  const { dotRef, ringRef } = useCursor();
-  const ctaRef = useMagnetic(0.35);
-  const cursorPosRef = useRef({ x: -999, y: -999 });
-
-  useEffect(() => {
-    const onMove = (e) => { cursorPosRef.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, []);
-
-  const parallaxTextRef  = useParallax(0.012);   // mid layer — text
-  const parallaxPhotoRef = useParallax(0.022);   // near layer — photo
 
   return (
     <>
@@ -622,31 +377,12 @@ export default function Home() {
         .d5 { animation-delay: 0.55s; }
         .d6 { animation-delay: 0.68s; }
 
-        /* Name shimmer */
-        @keyframes nameShimmer {
-          0%, 55%  { background-position: -200% center; }
-          75%, 100% { background-position: 200% center; }
-        }
         .hero-name {
           font-family: 'Bebas Neue', sans-serif;
           font-weight: 400;
           font-size: clamp(72px, 12vw, 140px);
           line-height: 0.95;
           letter-spacing: 0.04em;
-          background: linear-gradient(
-            90deg,
-            #ffffff 0%,
-            #ffffff 35%,
-            rgba(255, 210, 160, 0.92) 48%,
-            #ffffff 61%,
-            #ffffff 100%
-          );
-          background-size: 200%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: nameShimmer 6.5s ease-in-out infinite,
-                     riseIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         /* Tech stack row */
@@ -791,9 +527,6 @@ export default function Home() {
         .contact-link:hover { color: var(--orange); }
         .contact-link:hover .fa-icon { opacity: 0.8; }
 
-        @media (pointer: fine) {
-          *, *::before, *::after { cursor: none !important; }
-        }
       `}</style>
 
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
@@ -806,23 +539,6 @@ export default function Home() {
           borderRadius: '0 2px 2px 0',
           pointerEvents: 'none',
           transition: 'width 0.05s linear',
-        }} />
-
-        {/* Custom cursor */}
-        <div ref={dotRef} style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 9999,
-          width: 10, height: 10, borderRadius: '50%',
-          background: '#fb923c', pointerEvents: 'none',
-          transition: 'width 0.15s, height 0.15s',
-          willChange: 'transform',
-        }} />
-        <div ref={ringRef} style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 9998,
-          width: 36, height: 36, borderRadius: '50%',
-          border: '1.5px solid #fb923c', background: 'transparent',
-          pointerEvents: 'none',
-          transition: 'width 0.2s, height 0.2s, background 0.2s',
-          willChange: 'transform',
         }} />
 
         {/* Ambient glow */}
@@ -846,7 +562,7 @@ export default function Home() {
 
         {/* Hero */}
         <div className="relative">
-          <NeuralBackground cursorPosRef={cursorPosRef} />
+          <NeuralBackground />
           <div className="mesh-bg">
             <div className="blob" style={{ width:520, height:520, top:'5%',  left:'20%', background:'rgba(251,146,60,0.22)', animation:'b1 14s ease-in-out infinite' }} />
             <div className="blob" style={{ width:400, height:400, top:'30%', left:'55%', background:'rgba(234,88,12,0.18)',  animation:'b2 18s ease-in-out infinite' }} />
@@ -856,22 +572,20 @@ export default function Home() {
         <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
 
           {/* Photo */}
-          <div ref={parallaxPhotoRef} style={{ willChange: 'transform' }}>
-            <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
-              <div className="w-full h-full rounded-full overflow-hidden photo-ring">
-                <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
-              </div>
+          <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
+            <div className="w-full h-full rounded-full overflow-hidden photo-ring">
+              <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
             </div>
           </div>
 
-          <div ref={parallaxTextRef} style={{ willChange: 'transform' }}>
+          <div>
             {/* Eyebrow */}
             <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
               Hey, I'm
             </p>
 
             {/* Name */}
-            <h1 className="rise d4 hero-name mb-6">
+            <h1 className="rise d4 hero-name text-white mb-6">
               Derek Montgomery
             </h1>
 
@@ -904,21 +618,13 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="rise d6 flex gap-4 justify-center">
-              <a
-                ref={ctaRef}
-                href="/resume"
-                className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide"
-                style={{ display: 'inline-block', transition: 'transform 0.4s cubic-bezier(0.22,1,0.36,1)' }}
-              >
+              <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
                 View Resume
               </a>
             </div>
           </div>
         </section>
         </div>
-
-        {/* Stats */}
-        <StatsStrip />
 
         {/* Work */}
         <WorkCards />
