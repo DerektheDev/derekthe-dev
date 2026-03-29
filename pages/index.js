@@ -103,6 +103,42 @@ function useCursor() {
   return { dotRef, ringRef };
 }
 
+function useMagnetic(strength = 0.35) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const RADIUS = 70;
+      if (dist < RADIUS) {
+        const tx = dx * strength;
+        const ty = dy * strength;
+        el.style.transform = `translate(${tx}px, ${ty}px)`;
+      }
+    };
+    const onLeave = () => {
+      el.style.transform = 'translate(0px, 0px)';
+    };
+
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, [strength]);
+
+  return ref;
+}
+
 function NeuralBackground({ cursorPosRef }) {
   const canvasRef = useRef(null);
 
@@ -295,6 +331,7 @@ function NeuralBackground({ cursorPosRef }) {
 export default function Home() {
   const scrollProgress = useScrollProgress();
   const { dotRef, ringRef } = useCursor();
+  const ctaRef = useMagnetic(0.35);
   const cursorPosRef = useRef({ x: -999, y: -999 });
 
   useEffect(() => {
@@ -628,7 +665,12 @@ export default function Home() {
 
           {/* CTAs */}
           <div className="rise d6 flex gap-4 justify-center">
-            <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
+            <a
+              ref={ctaRef}
+              href="/resume"
+              className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide"
+              style={{ display: 'inline-block', transition: 'transform 0.4s cubic-bezier(0.22,1,0.36,1)' }}
+            >
               View Resume
             </a>
           </div>
