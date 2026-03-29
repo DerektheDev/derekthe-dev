@@ -240,6 +240,31 @@ export default function Home() {
           font-size: clamp(72px, 12vw, 140px);
           line-height: 0.95;
           letter-spacing: 0.04em;
+          background: linear-gradient(
+            105deg,
+            #606060 0%,
+            #a8a8a8 12%,
+            #d4d4d4 22%,
+            #ffffff 32%,
+            #f0f0f0 38%,
+            #c8c8c8 48%,
+            #888888 58%,
+            #b0b0b0 68%,
+            #e8e8e8 78%,
+            #ffffff 85%,
+            #909090 92%,
+            #606060 100%
+          );
+          background-size: 250% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: liquidMetal 5s ease-in-out infinite;
+        }
+        @keyframes liquidMetal {
+          0%   { background-position: 0%   center; }
+          50%  { background-position: 100% center; }
+          100% { background-position: 0%   center; }
         }
 
         /* Tech stack row */
@@ -430,7 +455,7 @@ export default function Home() {
           </p>
 
           {/* Name */}
-          <h1 className="rise d4 hero-name text-white mb-6">
+          <h1 className="rise d4 hero-name mb-6">
             Derek Montgomery
           </h1>
 
