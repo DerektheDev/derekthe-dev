@@ -6,7 +6,7 @@ export const jobs = [
     dateRange: ["2023", "Present"],
     location: "Remote",
     bullets: [
-      "Contributed to multiple AI projects, including O'Reilly content-powered Answers and custom assistants with RAG capabilities",
+      "Contributed extensively to the design, development, and success of multiple AI initiatives, including O'Reilly content-powered Answers and custom RAG-based assistants",
       "Most Impactful for the Business (Runner Up), Best Engineering (Runner Up) - 2024 Winter Hackathon",
       // "Early-adopter & presenter on the use of Artificial Intelligence in daily work",
     ]
@@ -30,7 +30,7 @@ export const jobs = [
     dateRange: ["2020", "2022"],
     location: "Remote",
     bullets: [
-      "Served fifteen individual contributors as people leader of the Front-End Development department of iFIT",
+      "Led and mentored fifteen individual contributors of the Front-End Development department of iFIT",
       "Collaborated with project and team leads to cultivate a consistently high-performing FED force",
       // "Ensured iFIT served the needs of its people in personal growth as much as they support the company in its goals",
     ],
