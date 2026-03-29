@@ -122,18 +122,13 @@ function useMagnetic(strength = 0.35) {
         const tx = dx * strength;
         const ty = dy * strength;
         el.style.transform = `translate(${tx}px, ${ty}px)`;
+      } else {
+        el.style.transform = 'translate(0px, 0px)';
       }
     };
-    const onLeave = () => {
-      el.style.transform = 'translate(0px, 0px)';
-    };
 
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
-    return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-    };
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
   }, [strength]);
 
   return ref;
