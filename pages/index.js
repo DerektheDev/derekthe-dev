@@ -76,6 +76,7 @@ function NeuralBackground() {
     }
 
     // Device orientation for mobile perspective control
+    const isMobile = "ontouchstart" in window;
     const orient = { beta: 0, gamma: 0, active: false, baseSet: false, baseBeta: 0, baseGamma: 0 };
 
     const onOrientation = (e) => {
@@ -127,15 +128,15 @@ function NeuralBackground() {
 
       // Advance rotation — device-driven on mobile, auto-drift on desktop
       if (orient.active) {
-        // Map tilt deltas (degrees) to target angles (radians), then lerp smoothly
-        const targetY =  (orient.gamma / 30) * 1.8;   // left/right tilt → Y rotation
-        const targetX = -(orient.beta  / 30) * 0.9;  // forward/back tilt → X rotation
+        const targetY =  (orient.gamma / 30) * 1.8;
+        const targetX = -(orient.beta  / 30) * 0.9;
         angleY += (targetY - angleY) * 0.1;
         angleX += (targetX - angleX) * 0.1;
-      } else {
+      } else if (!isMobile) {
         angleY += 0.0018;
         angleX += 0.0007;
       }
+      // on mobile before orientation is active: hold still
 
       // Drift nodes in local space (gentle bounce)
       nodes.forEach(n => {
