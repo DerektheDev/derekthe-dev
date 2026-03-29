@@ -456,9 +456,9 @@ export default function Home() {
           {/* Bio */}
           <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
             With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
-            <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
-            <span className="text-gray-200 font-medium">building startups</span>, and{" "}
-            <span className="text-gray-200 font-medium">consulting for large corporations</span>.
+            <span className="text-gray-200 font-medium">leading</span> engineering teams,{" "}
+            <span className="text-gray-200 font-medium">building</span> startups, and{" "}
+            <span className="text-gray-200 font-medium">consulting</span> for large corporations.
           </p>
 
           {/* CTAs */}
