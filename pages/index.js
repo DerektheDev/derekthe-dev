@@ -16,25 +16,25 @@ import derek from "../public/derek-linkedin.jpg";
 
 const projects = [
   {
-    name: "O'Reilly Platform",
-    description: "Learning platform serving millions of engineers worldwide.",
-    tags: ["Rails", "React"],
+    name: "O'Reilly Answers",
+    description: "AI-powered Q&A feature for the O'Reilly learning platform.",
+    tags: ["Rails", "React", "AI"],
     accent: "linear-gradient(135deg, #1a1a2e 0%, #2d1b00 100%)",
-    url: "https://www.oreilly.com",
+    url: "https://www.oreilly.com/online-learning/feature-answers.html",
   },
   {
-    name: "AI Tooling",
-    description: "Internal AI-assisted developer tooling at O'Reilly.",
-    tags: ["AI", "Ruby"],
+    name: "Gyve",
+    description: "Personal finance app for giving, saving, and budgeting.",
+    tags: ["React Native", "Ruby"],
     accent: "linear-gradient(135deg, #1a0a00 0%, #3d1500 100%)",
-    url: null,
+    url: "https://www.gyve.com",
   },
   {
-    name: "Your Project",
-    description: "Replace this with your own project description.",
-    tags: ["Your", "Tags"],
+    name: "iFit",
+    description: "Connected fitness platform powering NordicTrack and ProForm equipment.",
+    tags: ["Rails", "React"],
     accent: "linear-gradient(135deg, #0a0a1a 0%, #1a0d2e 100%)",
-    url: null,
+    url: "https://www.ifit.com",
   },
 ];
 
