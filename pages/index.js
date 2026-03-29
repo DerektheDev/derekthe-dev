@@ -185,141 +185,100 @@ function NeuralBackground() {
     const resize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
+      // Repaint background on resize to avoid blank flash
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    const NODE_COUNT = 72;
-    const CONNECT_DIST = 180; // 3D distance threshold
+    // Warm amber/orange palette matching the site
+    const palette = [
+      [251, 146,  60, 0.55],  // orange-400
+      [234,  88,  12, 0.50],  // orange-600
+      [249, 115,  22, 0.52],  // orange-500
+      [253, 186, 116, 0.42],  // orange-300 soft
+      [255, 220, 140, 0.32],  // golden haze
+      [180,  50,  10, 0.48],  // deep amber
+      [200,  80,  20, 0.45],  // burnt sienna
+    ];
 
-    // Nodes live in local 3D space; they drift slowly
-    const nodes = Array.from({ length: NODE_COUNT }, () => ({
-      lx: (Math.random() - 0.5) * canvas.width  * 1.2,
-      ly: (Math.random() - 0.5) * canvas.height * 1.2,
-      lz: (Math.random() - 0.5) * 500,
-      vx: (Math.random() - 0.5) * 0.18,
-      vy: (Math.random() - 0.5) * 0.18,
-      vz: (Math.random() - 0.5) * 0.18,
-      r:  Math.random() * 1.8 + 1,
-      opacity: Math.random() * 0.25 + 0.08,
-    }));
-
-    // Slow rotation angles (radians)
-    let angleY = 0;
-    let angleX = 0;
-    const FOCAL = 700;
-
-    // Project a local-space 3D point → screen 2D + depth info
-    function project(lx, ly, lz) {
-      // Rotate Y
-      const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
-      const wx =  lx * cosY + lz * sinY;
-      const wz = -lx * sinY + lz * cosY;
-      // Rotate X
-      const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
-      const wy =  ly * cosX - wz * sinX;
-      const fz =  ly * sinX + wz * cosX;
-
-      const depth = FOCAL + fz;
-      if (depth < 1) return null;
-      const scale = FOCAL / depth;
-      return {
-        sx: canvas.width  / 2 + wx * scale,
-        sy: canvas.height / 2 + wy * scale,
-        scale,   // 1 = at focal plane; >1 closer; <1 further
-        fz,      // for depth-based fade
-      };
+    // Composite sine-wave flow field — produces swirling, aurora-like paths
+    function flowAngle(x, y, t) {
+      const nx = x / (canvas.width  || 1);
+      const ny = y / (canvas.height || 1);
+      return (
+        Math.sin(nx * 4   + t * 0.70) * Math.cos(ny * 3   - t * 0.50) * Math.PI * 1.5 +
+        Math.sin(nx * 7   - ny * 5   + t * 0.35) * Math.PI * 0.60 +
+        Math.cos(nx * 2.5 + ny * 4   + t * 0.55) * Math.PI * 0.80
+      );
     }
 
-    // Signals: track by node index pairs + progress t
-    const signals = [];
-    const spawnSignal = () => {
-      const ai = Math.floor(Math.random() * nodes.length);
-      const bi = Math.floor(Math.random() * nodes.length);
-      if (ai === bi) return;
-      const a = nodes[ai], b = nodes[bi];
-      const dx = b.lx - a.lx, dy = b.ly - a.ly, dz = b.lz - a.lz;
-      if (Math.sqrt(dx*dx + dy*dy + dz*dz) < CONNECT_DIST) {
-        signals.push({ ai, bi, t: 0, speed: Math.random() * 0.004 + 0.003 });
-      }
+    const PARTICLE_COUNT = 420;
+    const mkParticle = () => {
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      return {
+        x:      Math.random() * canvas.width,
+        y:      Math.random() * canvas.height,
+        vx:     0,
+        vy:     0,
+        age:    Math.random() * 200,          // stagger initial ages
+        maxAge: 220 + Math.random() * 300,
+        speed:  0.55 + Math.random() * 1.65,
+        size:   0.35 + Math.random() * 1.90,
+        color:  c,
+      };
     };
-    const signalInterval = setInterval(spawnSignal, 600);
+
+    const particles = Array.from({ length: PARTICLE_COUNT }, mkParticle);
+
+    // Seed the canvas with the background color so trails fade correctly
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let t = 0;
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      t += 0.003;
 
-      // Advance rotation
-      angleY += 0.0018;
-      angleX += 0.0007;
+      // Semi-transparent veil fades old trail segments each frame
+      ctx.fillStyle = "rgba(26,26,26,0.13)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Drift nodes in local space (gentle bounce)
-      nodes.forEach(n => {
-        n.lx += n.vx; n.ly += n.vy; n.lz += n.vz;
-        const bx = canvas.width  * 0.65;
-        const by = canvas.height * 0.65;
-        const bz = 260;
-        if (Math.abs(n.lx) > bx) n.vx *= -1;
-        if (Math.abs(n.ly) > by) n.vy *= -1;
-        if (Math.abs(n.lz) > bz) n.vz *= -1;
-      });
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
 
-      // Project all nodes once
-      const projected = nodes.map(n => project(n.lx, n.ly, n.lz));
+        const angle = flowAngle(p.x, p.y, t);
+        p.vx = p.vx * 0.88 + Math.cos(angle) * p.speed * 0.12;
+        p.vy = p.vy * 0.88 + Math.sin(angle) * p.speed * 0.12;
 
-      // Draw edges (3D distance check, projected draw)
-      for (let i = 0; i < nodes.length; i++) {
-        if (!projected[i]) continue;
-        for (let j = i + 1; j < nodes.length; j++) {
-          if (!projected[j]) continue;
-          const dx = nodes[j].lx - nodes[i].lx;
-          const dy = nodes[j].ly - nodes[i].ly;
-          const dz = nodes[j].lz - nodes[i].lz;
-          const dist3d = Math.sqrt(dx*dx + dy*dy + dz*dz);
-          if (dist3d < CONNECT_DIST) {
-            // Fade by distance AND average depth
-            const proximity = 1 - dist3d / CONNECT_DIST;
-            const depthFade = Math.min(projected[i].scale, projected[j].scale);
-            const alpha = proximity * depthFade * 0.18;
-            ctx.beginPath();
-            ctx.moveTo(projected[i].sx, projected[i].sy);
-            ctx.lineTo(projected[j].sx, projected[j].sy);
-            ctx.strokeStyle = `rgba(255,255,255,${Math.min(alpha, 0.22)})`;
-            ctx.lineWidth = 0.8 * depthFade;
-            ctx.stroke();
-          }
+        const px = p.x;
+        const py = p.y;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.age++;
+
+        // Smooth fade-in / fade-out over particle lifetime
+        const life = p.age / p.maxAge;
+        const fade = life < 0.1 ? life / 0.1 : life > 0.8 ? 1 - (life - 0.8) / 0.2 : 1;
+
+        const [r, g, b, baseA] = p.color;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = `rgba(${r},${g},${b},${fade * baseA})`;
+        ctx.lineWidth = p.size * (0.45 + fade * 0.55);
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Recycle particle when expired or it drifts off-canvas
+        if (
+          p.age > p.maxAge ||
+          p.x < -20 || p.x > canvas.width  + 20 ||
+          p.y < -20 || p.y > canvas.height + 20
+        ) {
+          Object.assign(p, mkParticle());
         }
-      }
-
-      // Draw nodes (size + opacity scale with depth)
-      nodes.forEach((n, i) => {
-        const p = projected[i];
-        if (!p) return;
-        const r = n.r * p.scale;
-        const opacity = n.opacity * Math.min(p.scale * 1.1, 1);
-        ctx.beginPath();
-        ctx.arc(p.sx, p.sy, Math.max(r, 0.5), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-        ctx.fill();
-      });
-
-      // Draw & advance signals
-      for (let i = signals.length - 1; i >= 0; i--) {
-        const s = signals[i];
-        s.t += s.speed;
-        if (s.t >= 1) { signals.splice(i, 1); continue; }
-        const pa = projected[s.ai], pb = projected[s.bi];
-        if (!pa || !pb) continue;
-        const x = pa.sx + (pb.sx - pa.sx) * s.t;
-        const y = pa.sy + (pb.sy - pa.sy) * s.t;
-        const depthScale = pa.scale + (pb.scale - pa.scale) * s.t;
-        const glowR = 5 * depthScale;
-        const grd = ctx.createRadialGradient(x, y, 0, x, y, glowR);
-        grd.addColorStop(0, `rgba(255,255,255,${0.8 * depthScale})`);
-        grd.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.beginPath();
-        ctx.arc(x, y, glowR, 0, Math.PI * 2);
-        ctx.fillStyle = grd;
-        ctx.fill();
       }
 
       animId = requestAnimationFrame(draw);
@@ -329,7 +288,6 @@ function NeuralBackground() {
 
     return () => {
       cancelAnimationFrame(animId);
-      clearInterval(signalInterval);
       window.removeEventListener("resize", resize);
     };
   }, []);
