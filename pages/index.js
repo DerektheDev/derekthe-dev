@@ -103,7 +103,7 @@ function useCursor() {
   return { dotRef, ringRef };
 }
 
-function NeuralBackground() {
+function NeuralBackground({ cursorPosRef }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -192,6 +192,27 @@ function NeuralBackground() {
         if (Math.abs(n.lz) > bz) n.vz *= -1;
       });
 
+      // Cursor repulsion
+      const cp = cursorPosRef?.current;
+      if (cp && cp.x > 0) {
+        nodes.forEach(n => {
+          const p = project(n.lx, n.ly, n.lz);
+          if (!p) return;
+          const dx = p.sx - cp.x;
+          const dy = p.sy - cp.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const REPEL_RADIUS = 120;
+          if (dist < REPEL_RADIUS && dist > 0) {
+            const force = (1 - dist / REPEL_RADIUS) * 1.8;
+            n.vx += (dx / dist) * force * 0.04;
+            n.vy += (dy / dist) * force * 0.04;
+          }
+          // Decay back toward natural speed
+          n.vx *= 0.96;
+          n.vy *= 0.96;
+        });
+      }
+
       // Project all nodes once
       const projected = nodes.map(n => project(n.lx, n.ly, n.lz));
 
@@ -274,6 +295,14 @@ function NeuralBackground() {
 export default function Home() {
   const scrollProgress = useScrollProgress();
   const { dotRef, ringRef } = useCursor();
+  const cursorPosRef = useRef({ x: -999, y: -999 });
+
+  useEffect(() => {
+    const onMove = (e) => { cursorPosRef.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
+
   return (
     <>
       <Head>
@@ -544,7 +573,7 @@ export default function Home() {
 
         {/* Hero */}
         <div className="relative">
-          <NeuralBackground />
+          <NeuralBackground cursorPosRef={cursorPosRef} />
           <div className="mesh-bg">
             <div className="blob" style={{ width:520, height:520, top:'5%',  left:'20%', background:'rgba(251,146,60,0.22)', animation:'b1 14s ease-in-out infinite' }} />
             <div className="blob" style={{ width:400, height:400, top:'30%', left:'55%', background:'rgba(234,88,12,0.18)',  animation:'b2 18s ease-in-out infinite' }} />
