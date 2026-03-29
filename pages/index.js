@@ -75,6 +75,39 @@ function NeuralBackground() {
       };
     }
 
+    // Device orientation for mobile perspective control
+    const orient = { beta: 0, gamma: 0, active: false, baseSet: false, baseBeta: 0, baseGamma: 0 };
+
+    const onOrientation = (e) => {
+      if (e.gamma === null || e.beta === null) return;
+      if (!orient.baseSet) {
+        orient.baseBeta  = e.beta;
+        orient.baseGamma = e.gamma;
+        orient.baseSet   = true;
+      }
+      orient.gamma  = e.gamma  - orient.baseGamma;  // left/right tilt delta
+      orient.beta   = e.beta   - orient.baseBeta;   // forward/back tilt delta
+      orient.active = true;
+    };
+
+    const startOrientationListener = () => {
+      if (
+        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission === "function"
+      ) {
+        // iOS 13+ requires explicit permission from a user gesture
+        DeviceOrientationEvent.requestPermission()
+          .then(r => { if (r === "granted") window.addEventListener("deviceorientation", onOrientation); })
+          .catch(() => {});
+      } else if (typeof DeviceOrientationEvent !== "undefined") {
+        window.addEventListener("deviceorientation", onOrientation);
+      }
+    };
+
+    if ("ontouchstart" in window) {
+      window.addEventListener("touchstart", startOrientationListener, { once: true });
+    }
+
     // Signals: track by node index pairs + progress t
     const signals = [];
     const spawnSignal = () => {
@@ -92,9 +125,17 @@ function NeuralBackground() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Advance rotation
-      angleY += 0.0018;
-      angleX += 0.0007;
+      // Advance rotation — device-driven on mobile, auto-drift on desktop
+      if (orient.active) {
+        // Map tilt deltas (degrees) to target angles (radians), then lerp smoothly
+        const targetY =  (orient.gamma / 45) * 0.7;   // left/right tilt → Y rotation
+        const targetX = -(orient.beta  / 45) * 0.35;  // forward/back tilt → X rotation
+        angleY += (targetY - angleY) * 0.06;
+        angleX += (targetX - angleX) * 0.06;
+      } else {
+        angleY += 0.0018;
+        angleX += 0.0007;
+      }
 
       // Drift nodes in local space (gentle bounce)
       nodes.forEach(n => {
@@ -175,6 +216,8 @@ function NeuralBackground() {
       cancelAnimationFrame(animId);
       clearInterval(signalInterval);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("deviceorientation", onOrientation);
+      window.removeEventListener("touchstart", startOrientationListener);
     };
   }, []);
 
