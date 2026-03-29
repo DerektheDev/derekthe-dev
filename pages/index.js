@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,6 +17,27 @@ const contactLinks = [
   { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faPaperPlane },
   { href: "tel:13098400133", label: "309.840.0133", icon: faMobile },
 ];
+
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let rafId;
+    const onScroll = () => {
+      rafId = requestAnimationFrame(() => {
+        const el = document.documentElement;
+        const scrolled = el.scrollTop || document.body.scrollTop;
+        const total = el.scrollHeight - el.clientHeight;
+        setProgress(total > 0 ? scrolled / total : 0);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+  return progress;
+}
 
 function NeuralBackground() {
   const canvasRef = useRef(null);
@@ -187,6 +208,7 @@ function NeuralBackground() {
 }
 
 export default function Home() {
+  const scrollProgress = useScrollProgress();
   return (
     <>
       <Head>
@@ -386,6 +408,16 @@ export default function Home() {
       `}</style>
 
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
+
+        {/* Scroll progress bar */}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 200,
+          height: '3px', width: `${scrollProgress * 100}%`,
+          background: '#fb923c',
+          borderRadius: '0 2px 2px 0',
+          pointerEvents: 'none',
+          transition: 'width 0.05s linear',
+        }} />
 
         {/* Ambient glow */}
         <div style={{
