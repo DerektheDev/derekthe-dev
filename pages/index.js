@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faMobile, faBrain } from "@fortawesome/free-solid-svg-icons";
-import { faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faEnvelope, faMobile, faBrain } from "@fortawesome/free-solid-svg-icons";
+import { faLinkedinIn, faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const techStack = [
   { label: "Rails",     iconUrl: "https://cdn.simpleicons.org/rubyonrails/fb923c" },
@@ -13,10 +13,6 @@ const techStack = [
 ];
 import derek from "../public/derek-linkedin.jpg";
 
-const contactLinks = [
-  { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faPaperPlane },
-  { href: "tel:13098400133", label: "309.840.0133", icon: faMobile },
-];
 
 const projects = [
   {
@@ -927,20 +923,27 @@ export default function Home() {
         {/* Work */}
         <WorkCards />
 
-        {/* Contact */}
-        <section className="relative z-10 max-w-4xl mx-auto px-6 py-8 text-center">
-          <p className="text-[17px] uppercase tracking-[3px] text-gray-400 mb-4">
-            Get in Touch
-          </p>
-          <div className="flex gap-10 justify-center items-center">
-            {contactLinks.map(({ href, label, icon }) => (
-              <a key={label} href={href} className="contact-link flex items-center gap-2.5 text-[13px] text-gray-400">
-                <FontAwesomeIcon icon={icon} className="fa-icon w-4 opacity-50" />
+        {/* Footer */}
+        <footer className="relative z-10 max-w-4xl mx-auto px-6 pb-10">
+          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+            {[
+              { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faEnvelope },
+              { href: "tel:13098400133",               label: "309.840.0133",            icon: faMobile },
+              { href: "https://www.linkedin.com/in/derekthedev/", label: "LinkedIn",    icon: faLinkedinIn },
+              { href: "https://github.com/derekthedev",           label: "GitHub",      icon: faGithub },
+            ].map(({ href, label, icon }) => (
+              <a key={label} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
+                className="contact-link flex items-center gap-2 text-[12px] text-gray-500 hover:text-orange-400 transition-colors tracking-[0.12em] uppercase">
+                <FontAwesomeIcon icon={icon} className="w-3.5 opacity-60" />
                 {label}
               </a>
             ))}
           </div>
-        </section>
+          <p style={{ textAlign: 'center', fontSize: 10, color: '#333', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
+            © 2026 Derek Montgomery
+          </p>
+        </footer>
 
       </div>
     </>
