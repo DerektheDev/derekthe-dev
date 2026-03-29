@@ -40,6 +40,59 @@ function useScrollProgress() {
   return progress;
 }
 
+function useCursor() {
+  const dotRef = useRef(null);
+  const ringRef = useRef(null);
+  const pos = useRef({ x: -100, y: -100 });
+  const ringPos = useRef({ x: -100, y: -100 });
+  const rafId = useRef(null);
+
+  useEffect(() => {
+    const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener('mousemove', onMove);
+
+    const loop = () => {
+      // Dot: instant
+      if (dotRef.current) {
+        dotRef.current.style.transform =
+          `translate(${pos.current.x - 5}px, ${pos.current.y - 5}px)`;
+      }
+      // Ring: lerp
+      ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.12;
+      ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.12;
+      if (ringRef.current) {
+        ringRef.current.style.transform =
+          `translate(${ringPos.current.x - 18}px, ${ringPos.current.y - 18}px)`;
+      }
+      rafId.current = requestAnimationFrame(loop);
+    };
+    rafId.current = requestAnimationFrame(loop);
+
+    // Scale up on interactive elements
+    const onEnter = () => {
+      if (dotRef.current)  dotRef.current.style.transform += ' scale(1.6)';
+      if (ringRef.current) { ringRef.current.style.width = '48px'; ringRef.current.style.height = '48px'; ringRef.current.style.background = 'rgba(251,146,60,0.08)'; }
+    };
+    const onLeave = () => {
+      if (ringRef.current) { ringRef.current.style.width = '36px'; ringRef.current.style.height = '36px'; ringRef.current.style.background = 'transparent'; }
+    };
+    const addListeners = () => {
+      document.querySelectorAll('a, button').forEach(el => {
+        el.addEventListener('mouseenter', onEnter);
+        el.addEventListener('mouseleave', onLeave);
+      });
+    };
+    addListeners();
+
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
+  return { dotRef, ringRef };
+}
+
 function NeuralBackground() {
   const canvasRef = useRef(null);
 
@@ -210,6 +263,7 @@ function NeuralBackground() {
 
 export default function Home() {
   const scrollProgress = useScrollProgress();
+  const { dotRef, ringRef } = useCursor();
   return (
     <>
       <Head>
@@ -424,6 +478,10 @@ export default function Home() {
         .contact-link { transition: color 0.2s; }
         .contact-link:hover { color: var(--orange); }
         .contact-link:hover .fa-icon { opacity: 0.8; }
+
+        @media (pointer: fine) {
+          *, *::before, *::after { cursor: none !important; }
+        }
       `}</style>
 
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
@@ -436,6 +494,23 @@ export default function Home() {
           borderRadius: '0 2px 2px 0',
           pointerEvents: 'none',
           transition: 'width 0.05s linear',
+        }} />
+
+        {/* Custom cursor */}
+        <div ref={dotRef} style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 9999,
+          width: 10, height: 10, borderRadius: '50%',
+          background: '#fb923c', pointerEvents: 'none',
+          transition: 'width 0.15s, height 0.15s',
+          willChange: 'transform',
+        }} />
+        <div ref={ringRef} style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 9998,
+          width: 36, height: 36, borderRadius: '50%',
+          border: '1.5px solid #fb923c', background: 'transparent',
+          pointerEvents: 'none',
+          transition: 'width 0.2s, height 0.2s, background 0.2s',
+          willChange: 'transform',
         }} />
 
         {/* Ambient glow */}
