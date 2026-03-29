@@ -46,18 +46,17 @@ function useCursor() {
   const pos = useRef({ x: -100, y: -100 });
   const ringPos = useRef({ x: -100, y: -100 });
   const rafId = useRef(null);
+  const dotScale = useRef(1);
 
   useEffect(() => {
     const onMove = (e) => { pos.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', onMove);
 
     const loop = () => {
-      // Dot: instant
       if (dotRef.current) {
         dotRef.current.style.transform =
-          `translate(${pos.current.x - 5}px, ${pos.current.y - 5}px)`;
+          `translate(${pos.current.x - 5}px, ${pos.current.y - 5}px) scale(${dotScale.current})`;
       }
-      // Ring: lerp
       ringPos.current.x += (pos.current.x - ringPos.current.x) * 0.12;
       ringPos.current.y += (pos.current.y - ringPos.current.y) * 0.12;
       if (ringRef.current) {
@@ -68,25 +67,36 @@ function useCursor() {
     };
     rafId.current = requestAnimationFrame(loop);
 
-    // Scale up on interactive elements
     const onEnter = () => {
-      if (dotRef.current)  dotRef.current.style.transform += ' scale(1.6)';
-      if (ringRef.current) { ringRef.current.style.width = '48px'; ringRef.current.style.height = '48px'; ringRef.current.style.background = 'rgba(251,146,60,0.08)'; }
+      dotScale.current = 1.6;
+      if (ringRef.current) {
+        ringRef.current.style.width = '48px';
+        ringRef.current.style.height = '48px';
+        ringRef.current.style.background = 'rgba(251,146,60,0.08)';
+      }
     };
     const onLeave = () => {
-      if (ringRef.current) { ringRef.current.style.width = '36px'; ringRef.current.style.height = '36px'; ringRef.current.style.background = 'transparent'; }
+      dotScale.current = 1;
+      if (ringRef.current) {
+        ringRef.current.style.width = '36px';
+        ringRef.current.style.height = '36px';
+        ringRef.current.style.background = 'transparent';
+      }
     };
-    const addListeners = () => {
-      document.querySelectorAll('a, button').forEach(el => {
-        el.addEventListener('mouseenter', onEnter);
-        el.addEventListener('mouseleave', onLeave);
-      });
-    };
-    addListeners();
+
+    const interactiveEls = Array.from(document.querySelectorAll('a, button'));
+    interactiveEls.forEach(el => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
 
     return () => {
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(rafId.current);
+      interactiveEls.forEach(el => {
+        el.removeEventListener('mouseenter', onEnter);
+        el.removeEventListener('mouseleave', onLeave);
+      });
     };
   }, []);
 
