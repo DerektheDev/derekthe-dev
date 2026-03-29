@@ -171,6 +171,91 @@ function useParallax(factor) {
   return ref;
 }
 
+function useCountUp(target, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const triggered = useRef(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (target === '∞') { setValue('∞'); return; }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !triggered.current) {
+          triggered.current = true;
+          const start = performance.now();
+          const tick = (now) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setValue(Math.round(eased * target));
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.4 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return { value, ref };
+}
+
+function StatsStrip() {
+  const years    = useCountUp(15, 1200);
+  const ventures = useCountUp(3,  900);
+  const coffees  = useCountUp('∞');
+
+  const stats = [
+    { countHook: years,    suffix: '+', label: 'Years' },
+    { countHook: ventures, suffix: '+', label: 'Ventures' },
+    { countHook: coffees,  suffix: '',  label: 'Coffees' },
+  ];
+
+  return (
+    <div
+      ref={years.ref}
+      className="relative z-10 max-w-3xl mx-auto px-6 py-10"
+    >
+      {/* Top divider */}
+      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 0 }}>
+        {stats.map(({ countHook, suffix, label }, i) => (
+          <div key={label} style={{
+            textAlign: 'center',
+            padding: '0 2.5rem',
+            borderRight: i < stats.length - 1 ? '1px solid #2a2a2a' : 'none',
+          }}>
+            <div style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: 'clamp(40px, 7vw, 64px)',
+              lineHeight: 1,
+              color: '#fb923c',
+              letterSpacing: '0.02em',
+            }}>
+              {countHook.value}{suffix}
+            </div>
+            <div style={{
+              fontSize: 10,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: '#555',
+              marginTop: 6,
+            }}>
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom divider */}
+      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)', marginTop: '2rem' }} />
+    </div>
+  );
+}
+
 function NeuralBackground({ cursorPosRef }) {
   const canvasRef = useRef(null);
 
@@ -715,6 +800,9 @@ export default function Home() {
           </div>
         </section>
         </div>
+
+        {/* Stats */}
+        <StatsStrip />
 
         {/* Contact */}
         <section className="relative z-10 max-w-4xl mx-auto px-6 py-8 text-center">
