@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faMobile, faBrain } from "@fortawesome/free-solid-svg-icons";
-import { faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faEnvelope, faMobile, faBrain } from "@fortawesome/free-solid-svg-icons";
+import { faLinkedinIn, faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const techStack = [
   { label: "Rails",     iconUrl: "https://cdn.simpleicons.org/rubyonrails/fb923c" },
@@ -13,10 +13,166 @@ const techStack = [
 ];
 import derek from "../public/derek-linkedin.jpg";
 
-const contactLinks = [
-  { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faPaperPlane },
-  { href: "tel:13098400133", label: "309.840.0133", icon: faMobile },
+
+const projects = [
+  {
+    name: "O'Reilly Answers",
+    description: "AI-powered Q&A feature for the O'Reilly learning platform.",
+    tags: ["React", "Django", "AI"],
+    accent: "linear-gradient(135deg, #1a1a2e 0%, #2d1b00 100%)",
+    url: "https://www.oreilly.com/online-learning/feature-answers.html",
+  },
+  {
+    name: "Gyve",
+    description: "Generosity platform for churches and charities.",
+    tags: ["Rails", "React"],
+    accent: "linear-gradient(135deg, #1a0a00 0%, #3d1500 100%)",
+    url: "https://www.gyve.com",
+  },
+  {
+    name: "iFIT",
+    description: "Connected fitness platform powering NordicTrack and ProForm equipment.",
+    tags: ["React", "Webviews"],
+    accent: "linear-gradient(135deg, #0a0a1a 0%, #1a0d2e 100%)",
+    url: "https://www.ifit.com",
+  },
 ];
+
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let rafId;
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const el = document.documentElement;
+        const scrolled = el.scrollTop || document.body.scrollTop;
+        const total = el.scrollHeight - el.clientHeight;
+        setProgress(total > 0 ? scrolled / total : 0);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+  return progress;
+}
+
+
+
+
+
+function WorkCards() {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const cards = sectionRef.current?.querySelectorAll('.work-card');
+    if (!cards) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="relative z-10 max-w-4xl mx-auto px-6 pb-16">
+      <p style={{
+        fontSize: 18, letterSpacing: '0.18em',
+        color: '#ccc', textAlign: 'center', marginBottom: '2rem', marginTop: '4rem',
+      }}>
+        Selected Work
+      </p>
+      <div className="work-grid">
+        {projects.map((p, i) => {
+          const cardStyle = {
+            background: '#222',
+            borderRadius: 10,
+            overflow: 'hidden',
+            border: '1px solid #2a2a2a',
+            opacity: 0,
+            transform: 'translateY(20px)',
+            transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.1}s`,
+            display: 'flex',
+            flexDirection: 'column',
+            textDecoration: 'none',
+            color: 'inherit',
+          };
+          const Tag = p.url ? 'a' : 'div';
+          const linkProps = p.url ? { href: p.url, target: '_blank', rel: 'noreferrer' } : {};
+          return (
+            <Tag
+              key={p.name}
+              {...linkProps}
+              className={`work-card${p.url ? ' work-card-link' : ''}`}
+              style={cardStyle}
+              aria-label={p.url ? `${p.name} — ${p.description} (opens in new tab)` : undefined}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)';
+                e.currentTarget.style.borderColor = '#444';
+                e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#2a2a2a';
+                e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1)';
+              }}
+            >
+              {/* Color block header */}
+              <div
+                className="card-accent"
+                style={{
+                  height: 100,
+                  background: p.accent,
+                  position: 'relative',
+                  transition: 'filter 0.22s cubic-bezier(0.22,1,0.36,1)',
+                }}
+              >
+                <div style={{
+                  position: 'absolute', bottom: 10, left: 12,
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 22, letterSpacing: '0.04em', color: '#fff',
+                }}>
+                  {p.name}
+                </div>
+              </div>
+              {/* Card body */}
+              <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <p style={{ fontSize: 14, color: '#aaa', lineHeight: 1.55, marginBottom: 10, flex: 1 }}>
+                  {p.description}
+                </p>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  {p.tags.map((tag) => (
+                    <span key={tag} style={{
+                      fontSize: 12, background: '#2a2a2a', color: '#aaa',
+                      padding: '3px 7px', borderRadius: 4,
+                      fontFamily: "'Space Mono', monospace",
+                      letterSpacing: '0.05em',
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Tag>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 function NeuralBackground() {
   const canvasRef = useRef(null);
@@ -187,6 +343,8 @@ function NeuralBackground() {
 }
 
 export default function Home() {
+  const scrollProgress = useScrollProgress();
+
   return (
     <>
       <Head>
@@ -233,7 +391,6 @@ export default function Home() {
         .d5 { animation-delay: 0.55s; }
         .d6 { animation-delay: 0.68s; }
 
-        /* Name */
         .hero-name {
           font-family: 'Bebas Neue', sans-serif;
           font-weight: 400;
@@ -383,9 +540,40 @@ export default function Home() {
         .contact-link { transition: color 0.2s; }
         .contact-link:hover { color: var(--orange); }
         .contact-link:hover .fa-icon { opacity: 0.8; }
+
+        /* Work cards grid — responsive */
+        .work-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 640px) {
+          .work-grid { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .work-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Work card focus styles */
+        .work-card-link:focus-visible {
+          outline: 2px solid var(--orange);
+          outline-offset: 3px;
+          border-radius: 10px;
+        }
+
       `}</style>
 
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
+
+        {/* Scroll progress bar */}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 200,
+          height: '3px', width: `${scrollProgress * 100}%`,
+          background: '#fb923c',
+          borderRadius: '0 2px 2px 0',
+          pointerEvents: 'none',
+          transition: 'width 0.05s linear',
+        }} />
 
         {/* Ambient glow */}
         <div style={{
@@ -397,13 +585,22 @@ export default function Home() {
         }} />
 
         {/* Nav */}
-        <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]">
-          {[["Resume", "/resume"], ["LinkedIn", "https://www.linkedin.com/in/derekthedev/"], ["GitHub", "https://github.com/derekthedev"]].map(([label, href]) => (
-            <a key={label} href={href}
-              className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors">
-              {label}
-            </a>
-          ))}
+        <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]" aria-label="Main navigation">
+          <a href="/resume" className="text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors">
+            Resume
+          </a>
+          <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors"
+            aria-label="LinkedIn (opens in new tab)">
+            <FontAwesomeIcon icon={faLinkedinIn} className="w-3 h-3" />
+            LinkedIn
+          </a>
+          <a href="https://github.com/derekthedev" target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors"
+            aria-label="GitHub (opens in new tab)">
+            <FontAwesomeIcon icon={faGithub} className="w-3 h-3" />
+            GitHub
+          </a>
         </nav>
 
         {/* Hero */}
@@ -424,66 +621,76 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Eyebrow */}
-          <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
-            Hey, I'm
-          </p>
+          <div>
+            {/* Eyebrow */}
+            <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
+              Hey, I'm
+            </p>
 
-          {/* Name */}
-          <h1 className="rise d4 hero-name text-white mb-6">
-            Derek Montgomery
-          </h1>
+            {/* Name */}
+            <h1 className="rise d4 hero-name text-white mb-6">
+              Derek Montgomery
+            </h1>
 
-          {/* Subtitle */}
-          <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
-            Senior Software Engineer at{" "}
-            <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
-          </p>
+            {/* Subtitle */}
+            <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
+              Senior Software Engineer at{" "}
+              <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
+            </p>
 
-          {/* Tech stack */}
-          <div className="rise d5 tech-row my-9">
-            {techStack.map(({ label, iconUrl, faIcon }) => (
-              <span key={label} className="tech-item">
-                {iconUrl
-                  ? <img src={iconUrl} alt={label} />
-                  : <FontAwesomeIcon icon={faIcon} className="fa-brain" />
-                }
-                {label}
-              </span>
-            ))}
-          </div>
+            {/* Tech stack */}
+            <div className="rise d5 tech-row my-9">
+              {techStack.map(({ label, iconUrl, faIcon }) => (
+                <span key={label} className="tech-item">
+                  {iconUrl
+                    ? <img src={iconUrl} alt={label} />
+                    : <FontAwesomeIcon icon={faIcon} className="fa-brain" />
+                  }
+                  {label}
+                </span>
+              ))}
+            </div>
 
-          {/* Bio */}
-          <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
-            With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
-            <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
-            <span className="text-gray-200 font-medium">building startups</span>, and{" "}
-            <span className="text-gray-200 font-medium">consulting for large corporations</span>.
-          </p>
+            {/* Bio */}
+            <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
+              With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
+              <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
+              <span className="text-gray-200 font-medium">building startups</span>, and{" "}
+              <span className="text-gray-200 font-medium">consulting for large corporations</span>.
+            </p>
 
-          {/* CTAs */}
-          <div className="rise d6 flex gap-4 justify-center">
-            <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
-              View Resume
-            </a>
+            {/* CTAs */}
+            <div className="rise d6 flex gap-4 justify-center">
+              <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
+                View Resume
+              </a>
+            </div>
           </div>
         </section>
         </div>
 
-        {/* Contact */}
-        <section className="relative z-10 max-w-4xl mx-auto px-6 py-8 text-center">
-          <p className="text-[17px] uppercase tracking-[3px] text-gray-400 mb-4">
-            Get in Touch
-          </p>
-          <div className="flex gap-10 justify-center items-center">
-            {contactLinks.map(({ href, label, icon }) => (
-              <a key={label} href={href} className="contact-link flex items-center gap-2.5 text-[13px] text-gray-400">
-                <FontAwesomeIcon icon={icon} className="fa-icon w-4 opacity-50" />
+        {/* Work */}
+        <WorkCards />
+
+        {/* Footer */}
+        <footer className="relative z-10 max-w-4xl mx-auto px-6 pb-10" aria-label="Contact">
+          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+            {[
+              { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faEnvelope, ariaLabel: "Email Derek" },
+              { href: "tel:13098400133",               label: "309.840.0133",            icon: faMobile,   ariaLabel: "Call Derek" },
+            ].map(({ href, label, icon, ariaLabel }) => (
+              <a key={label} href={href} aria-label={ariaLabel}
+                className="contact-link flex items-center gap-2 text-[12px] text-gray-300 hover:text-orange-400 transition-colors tracking-[0.06em]">
+                <FontAwesomeIcon icon={icon} className="w-3.5 opacity-60" aria-hidden="true" />
                 {label}
               </a>
             ))}
           </div>
-        </section>
+          <p style={{ textAlign: 'center', fontSize: 10, color: '#aaa', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
+            © 2026 Derek Montgomery
+          </p>
+        </footer>
 
       </div>
     </>

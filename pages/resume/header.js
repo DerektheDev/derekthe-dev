@@ -42,7 +42,7 @@ const Header = () => (
       <div className="relative">
         <div className="md:border-l-[30px] border-orange-400 h-full absolute -ml-12" />
         <h1 className="text-4xl font-semibold mb-2">Derek Montgomery</h1>
-        <h2 className="text-2xl font-normal">Rails | React | Front-End</h2>
+        <h2 className="text-2xl font-normal">Rails | React | Front-End | AI</h2>
       </div>
       <p className="font-light">
         Partnering with high-standards individuals to build beautiful,
