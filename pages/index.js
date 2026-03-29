@@ -134,6 +134,43 @@ function useMagnetic(strength = 0.35) {
   return ref;
 }
 
+function useParallax(factor) {
+  const ref = useRef(null);
+  const target = useRef({ x: 0, y: 0 });
+  const current = useRef({ x: 0, y: 0 });
+  const rafId = useRef(null);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      target.current = {
+        x: (e.clientX - cx) * factor,
+        y: (e.clientY - cy) * factor,
+      };
+    };
+    window.addEventListener('mousemove', onMove);
+
+    const loop = () => {
+      current.current.x += (target.current.x - current.current.x) * 0.08;
+      current.current.y += (target.current.y - current.current.y) * 0.08;
+      if (ref.current) {
+        ref.current.style.transform =
+          `translate(${current.current.x}px, ${current.current.y}px)`;
+      }
+      rafId.current = requestAnimationFrame(loop);
+    };
+    rafId.current = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, [factor]);
+
+  return ref;
+}
+
 function NeuralBackground({ cursorPosRef }) {
   const canvasRef = useRef(null);
 
@@ -334,6 +371,9 @@ export default function Home() {
     window.addEventListener('mousemove', onMove);
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
+
+  const parallaxTextRef  = useParallax(0.012);   // mid layer — text
+  const parallaxPhotoRef = useParallax(0.022);   // near layer — photo
 
   return (
     <>
@@ -615,59 +655,63 @@ export default function Home() {
         <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
 
           {/* Photo */}
-          <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
-            <div className="w-full h-full rounded-full overflow-hidden photo-ring">
-              <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
+          <div ref={parallaxPhotoRef} style={{ willChange: 'transform' }}>
+            <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
+              <div className="w-full h-full rounded-full overflow-hidden photo-ring">
+                <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
+              </div>
             </div>
           </div>
 
-          {/* Eyebrow */}
-          <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
-            Hey, I'm
-          </p>
+          <div ref={parallaxTextRef} style={{ willChange: 'transform' }}>
+            {/* Eyebrow */}
+            <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
+              Hey, I'm
+            </p>
 
-          {/* Name */}
-          <h1 className="rise d4 hero-name mb-6">
-            Derek Montgomery
-          </h1>
+            {/* Name */}
+            <h1 className="rise d4 hero-name mb-6">
+              Derek Montgomery
+            </h1>
 
-          {/* Subtitle */}
-          <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
-            Senior Software Engineer at{" "}
-            <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
-          </p>
+            {/* Subtitle */}
+            <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
+              Senior Software Engineer at{" "}
+              <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
+            </p>
 
-          {/* Tech stack */}
-          <div className="rise d5 tech-row my-9">
-            {techStack.map(({ label, iconUrl, faIcon }) => (
-              <span key={label} className="tech-item">
-                {iconUrl
-                  ? <img src={iconUrl} alt={label} />
-                  : <FontAwesomeIcon icon={faIcon} className="fa-brain" />
-                }
-                {label}
-              </span>
-            ))}
-          </div>
+            {/* Tech stack */}
+            <div className="rise d5 tech-row my-9">
+              {techStack.map(({ label, iconUrl, faIcon }) => (
+                <span key={label} className="tech-item">
+                  {iconUrl
+                    ? <img src={iconUrl} alt={label} />
+                    : <FontAwesomeIcon icon={faIcon} className="fa-brain" />
+                  }
+                  {label}
+                </span>
+              ))}
+            </div>
 
-          {/* Bio */}
-          <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
-            With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
-            <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
-            <span className="text-gray-200 font-medium">building startups</span>, and{" "}
-            <span className="text-gray-200 font-medium">consulting for large corporations</span>.
-          </p>
+            {/* Bio */}
+            <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
+              With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
+              <span className="text-gray-200 font-medium">leading engineering teams</span>,{" "}
+              <span className="text-gray-200 font-medium">building startups</span>, and{" "}
+              <span className="text-gray-200 font-medium">consulting for large corporations</span>.
+            </p>
 
-          {/* CTAs */}
-          <div className="rise d6 flex gap-4 justify-center">
-            <a
-              ref={ctaRef}
-              href="/resume"
-              className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide"
-              style={{ display: 'inline-block', transition: 'transform 0.4s cubic-bezier(0.22,1,0.36,1)' }}
-            >
-              View Resume
-            </a>
+            {/* CTAs */}
+            <div className="rise d6 flex gap-4 justify-center">
+              <a
+                ref={ctaRef}
+                href="/resume"
+                className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide"
+                style={{ display: 'inline-block', transition: 'transform 0.4s cubic-bezier(0.22,1,0.36,1)' }}
+              >
+                View Resume
+              </a>
+            </div>
           </div>
         </section>
         </div>
