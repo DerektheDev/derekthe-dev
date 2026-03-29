@@ -20,18 +20,21 @@ const projects = [
     description: "Learning platform serving millions of engineers worldwide.",
     tags: ["Rails", "React"],
     accent: "linear-gradient(135deg, #1a1a2e 0%, #2d1b00 100%)",
+    url: "https://www.oreilly.com",
   },
   {
     name: "AI Tooling",
     description: "Internal AI-assisted developer tooling at O'Reilly.",
     tags: ["AI", "Ruby"],
     accent: "linear-gradient(135deg, #1a0a00 0%, #3d1500 100%)",
+    url: null,
   },
   {
     name: "Your Project",
     description: "Replace this with your own project description.",
     tags: ["Your", "Tags"],
     accent: "linear-gradient(135deg, #0a0a1a 0%, #1a0d2e 100%)",
+    url: null,
   },
 ];
 
@@ -85,76 +88,86 @@ function WorkCards() {
   return (
     <section ref={sectionRef} className="relative z-10 max-w-4xl mx-auto px-6 pb-16">
       <p style={{
-        fontSize: 10, letterSpacing: '0.25em', textTransform: 'uppercase',
-        color: '#555', textAlign: 'center', marginBottom: '2rem',
+        fontSize: 13, letterSpacing: '0.25em', textTransform: 'uppercase',
+        color: '#999', textAlign: 'center', marginBottom: '2rem',
       }}>
         Selected Work
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {projects.map((p, i) => (
-          <div
-            key={p.name}
-            className="work-card"
-            style={{
-              background: '#222',
-              borderRadius: 10,
-              overflow: 'hidden',
-              border: '1px solid #2a2a2a',
-              opacity: 0,
-              transform: 'translateY(20px)',
-              transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.1}s`,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)';
-              e.currentTarget.style.borderColor = '#444';
-              e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-              e.currentTarget.style.borderColor = '#2a2a2a';
-              e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1)';
-            }}
-          >
-            {/* Color block header */}
-            <div
-              className="card-accent"
-              style={{
-                height: 100,
-                background: p.accent,
-                position: 'relative',
-                transition: 'filter 0.22s cubic-bezier(0.22,1,0.36,1)',
+      <div className="work-grid">
+        {projects.map((p, i) => {
+          const cardStyle = {
+            background: '#222',
+            borderRadius: 10,
+            overflow: 'hidden',
+            border: '1px solid #2a2a2a',
+            opacity: 0,
+            transform: 'translateY(20px)',
+            transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.1}s`,
+            display: 'block',
+            textDecoration: 'none',
+            color: 'inherit',
+          };
+          const Tag = p.url ? 'a' : 'div';
+          const linkProps = p.url ? { href: p.url, target: '_blank', rel: 'noreferrer' } : {};
+          return (
+            <Tag
+              key={p.name}
+              {...linkProps}
+              className={`work-card${p.url ? ' work-card-link' : ''}`}
+              style={cardStyle}
+              aria-label={p.url ? `${p.name} — ${p.description} (opens in new tab)` : undefined}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)';
+                e.currentTarget.style.borderColor = '#444';
+                e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#2a2a2a';
+                e.currentTarget.querySelector('.card-accent').style.filter = 'brightness(1)';
               }}
             >
-              <div style={{
-                position: 'absolute', bottom: 10, left: 12,
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: 22, letterSpacing: '0.04em', color: '#fff',
-              }}>
-                {p.name}
+              {/* Color block header */}
+              <div
+                className="card-accent"
+                style={{
+                  height: 100,
+                  background: p.accent,
+                  position: 'relative',
+                  transition: 'filter 0.22s cubic-bezier(0.22,1,0.36,1)',
+                }}
+              >
+                <div style={{
+                  position: 'absolute', bottom: 10, left: 12,
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: 22, letterSpacing: '0.04em', color: '#fff',
+                }}>
+                  {p.name}
+                </div>
               </div>
-            </div>
-            {/* Card body */}
-            <div style={{ padding: '12px 14px' }}>
-              <p style={{ fontSize: 12, color: '#777', lineHeight: 1.55, marginBottom: 10 }}>
-                {p.description}
-              </p>
-              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                {p.tags.map((tag) => (
-                  <span key={tag} style={{
-                    fontSize: 10, background: '#2a2a2a', color: '#888',
-                    padding: '3px 7px', borderRadius: 4,
-                    fontFamily: "'Space Mono', monospace",
-                    letterSpacing: '0.05em',
-                  }}>
-                    {tag}
-                  </span>
-                ))}
+              {/* Card body */}
+              <div style={{ padding: '12px 14px' }}>
+                <p style={{ fontSize: 12, color: '#777', lineHeight: 1.55, marginBottom: 10 }}>
+                  {p.description}
+                </p>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  {p.tags.map((tag) => (
+                    <span key={tag} style={{
+                      fontSize: 10, background: '#2a2a2a', color: '#888',
+                      padding: '3px 7px', borderRadius: 4,
+                      fontFamily: "'Space Mono', monospace",
+                      letterSpacing: '0.05em',
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </Tag>
+          );
+        })}
       </div>
     </section>
   );
@@ -527,6 +540,26 @@ export default function Home() {
         .contact-link:hover { color: var(--orange); }
         .contact-link:hover .fa-icon { opacity: 0.8; }
 
+        /* Work cards grid — responsive */
+        .work-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 640px) {
+          .work-grid { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 641px) and (max-width: 900px) {
+          .work-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Work card focus styles */
+        .work-card-link:focus-visible {
+          outline: 2px solid var(--orange);
+          outline-offset: 3px;
+          border-radius: 10px;
+        }
+
       `}</style>
 
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
@@ -551,13 +584,22 @@ export default function Home() {
         }} />
 
         {/* Nav */}
-        <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]">
-          {[["Resume", "/resume"], ["LinkedIn", "https://www.linkedin.com/in/derekthedev/"], ["GitHub", "https://github.com/derekthedev"]].map(([label, href]) => (
-            <a key={label} href={href}
-              className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors">
-              {label}
-            </a>
-          ))}
+        <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]" aria-label="Main navigation">
+          <a href="/resume" className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors">
+            Resume
+          </a>
+          <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors"
+            aria-label="LinkedIn (opens in new tab)">
+            <FontAwesomeIcon icon={faLinkedinIn} className="w-3 h-3" />
+            LinkedIn
+          </a>
+          <a href="https://github.com/derekthedev" target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors"
+            aria-label="GitHub (opens in new tab)">
+            <FontAwesomeIcon icon={faGithub} className="w-3 h-3" />
+            GitHub
+          </a>
         </nav>
 
         {/* Hero */}
@@ -630,23 +672,21 @@ export default function Home() {
         <WorkCards />
 
         {/* Footer */}
-        <footer className="relative z-10 max-w-4xl mx-auto px-6 pb-10">
+        <footer className="relative z-10 max-w-4xl mx-auto px-6 pb-10" aria-label="Contact">
           <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
             {[
-              { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faEnvelope },
-              { href: "tel:13098400133",               label: "309.840.0133",            icon: faMobile },
-              { href: "https://www.linkedin.com/in/derekthedev/", label: "LinkedIn",    icon: faLinkedinIn },
-              { href: "https://github.com/derekthedev",           label: "GitHub",      icon: faGithub },
-            ].map(({ href, label, icon }) => (
-              <a key={label} href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer"
+              { href: "mailto:derekthedev@icloud.com", label: "derekthedev@icloud.com", icon: faEnvelope, ariaLabel: "Email Derek" },
+              { href: "tel:13098400133",               label: "309.840.0133",            icon: faMobile,   ariaLabel: "Call Derek" },
+            ].map(({ href, label, icon, ariaLabel }) => (
+              <a key={label} href={href} aria-label={ariaLabel}
                 className="contact-link flex items-center gap-2 text-[12px] text-gray-500 hover:text-orange-400 transition-colors tracking-[0.12em] uppercase">
-                <FontAwesomeIcon icon={icon} className="w-3.5 opacity-60" />
+                <FontAwesomeIcon icon={icon} className="w-3.5 opacity-60" aria-hidden="true" />
                 {label}
               </a>
             ))}
           </div>
-          <p style={{ textAlign: 'center', fontSize: 10, color: '#333', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
+          <p style={{ textAlign: 'center', fontSize: 10, color: '#777', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
             © 2026 Derek Montgomery
           </p>
         </footer>
