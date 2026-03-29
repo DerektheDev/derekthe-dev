@@ -149,13 +149,13 @@ function WorkCards() {
               </div>
               {/* Card body */}
               <div style={{ padding: '12px 14px' }}>
-                <p style={{ fontSize: 12, color: '#aaa', lineHeight: 1.55, marginBottom: 10 }}>
+                <p style={{ fontSize: 14, color: '#aaa', lineHeight: 1.55, marginBottom: 10 }}>
                   {p.description}
                 </p>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {p.tags.map((tag) => (
                     <span key={tag} style={{
-                      fontSize: 10, background: '#2a2a2a', color: '#aaa',
+                      fontSize: 12, background: '#2a2a2a', color: '#aaa',
                       padding: '3px 7px', borderRadius: 4,
                       fontFamily: "'Space Mono', monospace",
                       letterSpacing: '0.05em',
