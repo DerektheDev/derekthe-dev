@@ -88,8 +88,8 @@ function WorkCards() {
   return (
     <section ref={sectionRef} className="relative z-10 max-w-4xl mx-auto px-6 pb-16">
       <p style={{
-        fontSize: 13, letterSpacing: '0.25em', textTransform: 'uppercase',
-        color: '#999', textAlign: 'center', marginBottom: '2rem',
+        fontSize: 18, letterSpacing: '0.18em',
+        color: '#ccc', textAlign: 'center', marginBottom: '2rem', marginTop: '4rem',
       }}>
         Selected Work
       </p>
@@ -149,13 +149,13 @@ function WorkCards() {
               </div>
               {/* Card body */}
               <div style={{ padding: '12px 14px' }}>
-                <p style={{ fontSize: 12, color: '#777', lineHeight: 1.55, marginBottom: 10 }}>
+                <p style={{ fontSize: 12, color: '#aaa', lineHeight: 1.55, marginBottom: 10 }}>
                   {p.description}
                 </p>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {p.tags.map((tag) => (
                     <span key={tag} style={{
-                      fontSize: 10, background: '#2a2a2a', color: '#888',
+                      fontSize: 10, background: '#2a2a2a', color: '#aaa',
                       padding: '3px 7px', borderRadius: 4,
                       fontFamily: "'Space Mono', monospace",
                       letterSpacing: '0.05em',
@@ -585,17 +585,17 @@ export default function Home() {
 
         {/* Nav */}
         <nav className="rise d1 relative z-10 flex justify-center gap-10 px-6 py-5 border-b border-white/[0.05]" aria-label="Main navigation">
-          <a href="/resume" className="text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors">
+          <a href="/resume" className="text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors">
             Resume
           </a>
           <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors"
             aria-label="LinkedIn (opens in new tab)">
             <FontAwesomeIcon icon={faLinkedinIn} className="w-3 h-3" />
             LinkedIn
           </a>
           <a href="https://github.com/derekthedev" target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-orange-400 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] tracking-[0.2em] text-gray-300 hover:text-orange-400 transition-colors"
             aria-label="GitHub (opens in new tab)">
             <FontAwesomeIcon icon={faGithub} className="w-3 h-3" />
             GitHub
@@ -680,13 +680,13 @@ export default function Home() {
               { href: "tel:13098400133",               label: "309.840.0133",            icon: faMobile,   ariaLabel: "Call Derek" },
             ].map(({ href, label, icon, ariaLabel }) => (
               <a key={label} href={href} aria-label={ariaLabel}
-                className="contact-link flex items-center gap-2 text-[12px] text-gray-500 hover:text-orange-400 transition-colors tracking-[0.12em] uppercase">
+                className="contact-link flex items-center gap-2 text-[12px] text-gray-300 hover:text-orange-400 transition-colors tracking-[0.06em]">
                 <FontAwesomeIcon icon={icon} className="w-3.5 opacity-60" aria-hidden="true" />
                 {label}
               </a>
             ))}
           </div>
-          <p style={{ textAlign: 'center', fontSize: 10, color: '#777', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
+          <p style={{ textAlign: 'center', fontSize: 10, color: '#aaa', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
             © 2026 Derek Montgomery
           </p>
         </footer>
