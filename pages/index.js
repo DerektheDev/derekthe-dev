@@ -182,59 +182,73 @@ function NeuralBackground() {
     const ctx = canvas.getContext("2d");
     let animId;
 
+    // Render at half resolution — cheaper, and the upscale adds natural softness
+    // on top of the CSS blur that does the real merging work.
     const resize = () => {
-      canvas.width  = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      canvas.width  = Math.round(canvas.offsetWidth  / 2);
+      canvas.height = Math.round(canvas.offsetHeight / 2);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    // Each node drifts on an independent Lissajous path.
-    // px/py = phase offset, fx/fy = frequency, ax/ay = amplitude (fraction of W/H).
-    // color = [r,g,b], a = peak alpha, rf = radius as fraction of canvas diagonal.
-    const nodes = [
-      { px:0.00, py:0.00, fx:0.31, fy:0.27, ax:0.38, ay:0.32, color:[251,146, 60], a:0.58, rf:0.62 },
-      { px:1.20, py:0.80, fx:0.19, fy:0.23, ax:0.44, ay:0.38, color:[234, 88, 12], a:0.52, rf:0.66 },
-      { px:2.40, py:1.60, fx:0.37, fy:0.31, ax:0.32, ay:0.44, color:[249,115, 22], a:0.50, rf:0.56 },
-      { px:3.60, py:2.40, fx:0.25, fy:0.41, ax:0.48, ay:0.28, color:[253,186,116], a:0.40, rf:0.70 },
-      { px:0.50, py:3.20, fx:0.43, fy:0.17, ax:0.40, ay:0.46, color:[180, 50, 10], a:0.54, rf:0.64 },
-      { px:1.80, py:0.40, fx:0.22, fy:0.38, ax:0.45, ay:0.34, color:[200, 80, 20], a:0.47, rf:0.60 },
-      { px:4.20, py:1.00, fx:0.34, fy:0.29, ax:0.35, ay:0.40, color:[255,160, 50], a:0.44, rf:0.68 },
-      { px:2.90, py:4.50, fx:0.28, fy:0.35, ax:0.42, ay:0.32, color:[160, 40,  5], a:0.50, rf:0.58 },
-      { px:0.90, py:2.10, fx:0.39, fy:0.22, ax:0.36, ay:0.42, color:[230,100, 30], a:0.45, rf:0.54 },
+    // Aurora bands — elongated ellipses that independently rotate + drift.
+    // baseCx/Cy : resting center (0–1 fraction of W/H)
+    // driftX/Y  : sinusoidal drift amplitude
+    // phX/Y     : phase offset so bands start staggered
+    // freqX/Y   : drift cycle speed
+    // angle     : current rotation (radians)
+    // dAngle    : rotation speed per frame
+    // rx/ry     : ellipse radii as fraction of W/H (very wide, narrow = band shape)
+    // color     : [r,g,b]
+    // a         : peak center alpha
+    const bands = [
+      { angle:0.00, dAngle: 0.00080, baseCx:0.50, baseCy:0.38, driftX:0.14, driftY:0.09, phX:0.0, phY:0.0, freqX:0.25, freqY:0.31, rx:0.80, ry:0.22, color:[251,146, 60], a:0.80 },
+      { angle:1.05, dAngle:-0.00060, baseCx:0.42, baseCy:0.58, driftX:0.16, driftY:0.11, phX:1.2, phY:2.1, freqX:0.19, freqY:0.27, rx:0.72, ry:0.19, color:[215, 52,  8], a:0.75 },
+      { angle:2.20, dAngle: 0.00050, baseCx:0.62, baseCy:0.48, driftX:0.12, driftY:0.13, phX:2.4, phY:0.8, freqX:0.33, freqY:0.22, rx:0.76, ry:0.21, color:[255,178, 44], a:0.70 },
+      { angle:1.60, dAngle:-0.00070, baseCx:0.37, baseCy:0.44, driftX:0.17, driftY:0.10, phX:3.6, phY:1.4, freqX:0.28, freqY:0.35, rx:0.68, ry:0.18, color:[162, 34,  4], a:0.78 },
+      { angle:3.10, dAngle: 0.00065, baseCx:0.64, baseCy:0.54, driftX:0.13, driftY:0.12, phX:0.6, phY:3.2, freqX:0.37, freqY:0.20, rx:0.70, ry:0.20, color:[253,195,108], a:0.60 },
+      { angle:0.70, dAngle:-0.00045, baseCx:0.54, baseCy:0.62, driftX:0.15, driftY:0.08, phX:4.8, phY:0.5, freqX:0.22, freqY:0.40, rx:0.74, ry:0.17, color:[195, 65, 12], a:0.68 },
     ];
 
     let t = 0;
 
     const draw = () => {
-      t += 0.004;
+      t += 0.003;
 
       const W = canvas.width;
       const H = canvas.height;
-      const diag = Math.sqrt(W * W + H * H);
 
-      // Clear to base background each frame — no trails, pure mesh
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#1a1a1a";
-      ctx.fillRect(0, 0, W, H);
 
-      nodes.forEach(n => {
-        // Smooth Lissajous position
-        const cx = W * 0.5 + W * n.ax * Math.sin(n.fx * t + n.px);
-        const cy = H * 0.5 + H * n.ay * Math.cos(n.fy * t + n.py);
-        const r  = diag * n.rf;
+      bands.forEach(b => {
+        b.angle += b.dAngle;
 
-        const [cr, cg, cb] = n.color;
-        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        grd.addColorStop(0,    `rgba(${cr},${cg},${cb},${n.a})`);
-        grd.addColorStop(0.35, `rgba(${cr},${cg},${cb},${(n.a * 0.55).toFixed(3)})`);
-        grd.addColorStop(0.70, `rgba(${cr},${cg},${cb},${(n.a * 0.18).toFixed(3)})`);
-        grd.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
+        // Drifting center
+        const cx = W * (b.baseCx + b.driftX * Math.sin(b.freqX * t + b.phX));
+        const cy = H * (b.baseCy + b.driftY * Math.cos(b.freqY * t + b.phY));
+
+        // Ellipse via context scale trick: scale Y so a circle becomes an ellipse
+        const rx = W * b.rx;
+        const ry = H * b.ry;
+        const scaleY = ry / rx;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(b.angle);
+        ctx.scale(1, scaleY);
+
+        const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+        const [r, g, bv] = b.color;
+        grd.addColorStop(0,    `rgba(${r},${g},${bv},${b.a})`);
+        grd.addColorStop(0.45, `rgba(${r},${g},${bv},${+(b.a * 0.40).toFixed(3)})`);
+        grd.addColorStop(0.80, `rgba(${r},${g},${bv},${+(b.a * 0.10).toFixed(3)})`);
+        grd.addColorStop(1,    `rgba(${r},${g},${bv},0)`);
 
         ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.arc(0, 0, rx, 0, Math.PI * 2);
         ctx.fillStyle = grd;
         ctx.fill();
+        ctx.restore();
       });
 
       animId = requestAnimationFrame(draw);
@@ -248,10 +262,16 @@ function NeuralBackground() {
     };
   }, []);
 
+  // CSS blur is the key ingredient — it merges the raw bands into one
+  // continuous glowing aurora field. saturate lifts the warmth.
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}
+      style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        pointerEvents: "none", zIndex: 2,
+        filter: "blur(48px) saturate(1.3)",
+      }}
     />
   );
 }
