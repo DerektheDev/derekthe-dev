@@ -22,9 +22,9 @@ Add a WebGL aurora effect behind the existing neural network animation in the ho
 - Mid amber→orange accent
 
 ### Animation
-- Camera orbits the helix on the Y axis at 0.25 rad/s
-- Camera tilt oscillates ±35° on a ~48s cycle
-- Gentle camera roll (±0.1 rad) on a ~70s cycle
+- Camera orbits the helix on the Y axis at 0.12 rad/s
+- Camera tilt oscillates ±25° on a ~90s cycle
+- Gentle camera roll (±0.06 rad) on a ~125s cycle
 - Ribbons have organic wobble from layered sin/cos perturbations on x, y, z
 - Overall feel: medium intensity, Stripe-like fluidity
 
@@ -47,7 +47,7 @@ Add a WebGL aurora effect behind the existing neural network animation in the ho
 
 **Shaders:**
 - Vertex shader: transforms positions via projection + view matrices, passes normal/edge/color varyings
-- Fragment shader: gaussian alpha falloff across ribbon width (`exp(-3.5 * edge²)`), half-lambert diffuse + Fresnel rim for 3D volume, moderate brightness (0.9x multiplier)
+- Fragment shader: gaussian alpha falloff across ribbon width (`exp(-3.5 * edge²)`), half-lambert diffuse + Fresnel rim for 3D volume, brightness at 0.7x (dimmed to sit behind neural net)
 
 **Geometry per ribbon (built each frame):**
 - 400 segments per ribbon, 5 ribbons = 2000 total segments
@@ -85,5 +85,11 @@ Add a WebGL aurora effect behind the existing neural network animation in the ho
 - Hero section only (same as existing NeuralBackground)
 - Aurora canvases are `position: absolute; inset: 0` within the hero wrapper
 
+### Tuned intensity values (final)
+- Ribbon alpha: `taper * 0.25`
+- Glow canvas CSS opacity: `0.25`
+- Shader brightness multiplier: `0.7`
+- Neural net boosted: 90 nodes, 210 connect distance, node radius 1.2–3.6, edge alpha cap 0.35
+
 ## Reference implementation
-The working prototype is at `.superpowers/brainstorm/82143-1774816318/content/aurora-ribbons-v3.html`
+The working combined prototype is at `.superpowers/brainstorm/46529-1774834237/content/aurora-combined.html`
