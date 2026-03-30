@@ -329,7 +329,7 @@ function AuroraBackground() {
         const bn = vecNormalize(vecCross(tang, norm));
         const r = c1[0]+(c2[0]-c1[0])*t, g = c1[1]+(c2[1]-c1[1])*t, b2 = c1[2]+(c2[2]-c1[2])*t;
         const endDist = Math.min(t, 1-t), taper = Math.min(endDist*10, 1);
-        const w = width*0.5, alpha = taper*0.25;
+        const w = width*0.5, alpha = taper*0.16;
         verts.push(p[0]+bn[0]*w, p[1]+bn[1]*w, p[2]+bn[2]*w, norm[0],norm[1],norm[2], r,g,b2,alpha, -1);
         verts.push(p[0]-bn[0]*w, p[1]-bn[1]*w, p[2]-bn[2]*w, norm[0],norm[1],norm[2], r,g,b2,alpha, 1);
       }
@@ -647,7 +647,7 @@ export default function Home() {
 
         /* Aurora WebGL layers */
         .aurora-wrap { position: absolute; inset: 0; z-index: 0; }
-        .c-glow { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); filter: blur(32px); opacity: 0.25; }
+        .c-glow { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); filter: blur(32px); opacity: 0.16; }
         .c-crisp { position: absolute; inset: 0; width: 100%; height: 100%; }
 
         /* Mac-style mesh gradient blobs */
