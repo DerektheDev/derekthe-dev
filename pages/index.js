@@ -4,6 +4,7 @@ import Nav from "./home/Nav";
 import Hero from "./home/Hero";
 import WorkCards from "./home/WorkCards";
 import Footer from "./home/Footer";
+import styles from "./index.module.css";
 
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);
@@ -44,23 +45,10 @@ export default function Home() {
       <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
 
         {/* Scroll progress bar */}
-        <div style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 200,
-          height: '3px', width: `${scrollProgress * 100}%`,
-          background: '#fb923c',
-          borderRadius: '0 2px 2px 0',
-          pointerEvents: 'none',
-          transition: 'width 0.05s linear',
-        }} />
+        <div className={styles.progressBar} style={{ '--progress': scrollProgress }} />
 
         {/* Ambient glow */}
-        <div style={{
-          position: 'fixed', top: 0, left: '50%',
-          transform: 'translateX(-50%)',
-          width: '800px', height: '600px',
-          background: 'radial-gradient(ellipse at 50% -10%, rgba(251,146,60,0.09) 0%, transparent 65%)',
-          pointerEvents: 'none', zIndex: 0,
-        }} />
+        <div className={styles.ambientGlow} />
 
         <Nav />
         <Hero />

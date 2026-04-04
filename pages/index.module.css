@@ -1,0 +1,24 @@
+.progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  height: 3px;
+  width: calc(var(--progress) * 100%);
+  background: #fb923c;
+  border-radius: 0 2px 2px 0;
+  pointer-events: none;
+  transition: width 0.05s linear;
+}
+
+.ambientGlow {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse at 50% -10%, rgba(251,146,60,0.09) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
