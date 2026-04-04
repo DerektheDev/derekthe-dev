@@ -42,7 +42,7 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="page-wrap min-h-screen bg-[#1a1a1a] text-white space-mono relative">
+      <div className={`page-wrap space-mono ${styles.pageWrap}`}>
 
         {/* Scroll progress bar */}
         <div className={styles.progressBar} style={{ '--progress': scrollProgress }} />

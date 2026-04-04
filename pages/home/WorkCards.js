@@ -23,7 +23,7 @@ export default function WorkCards() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative z-10 max-w-4xl mx-auto px-6 pb-16">
+    <section ref={sectionRef} className={styles.section}>
       <p className={styles.sectionLabel}>
         Selected Work
       </p>

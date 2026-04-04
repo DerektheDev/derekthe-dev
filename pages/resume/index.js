@@ -13,6 +13,7 @@ import {
   industries,
 } from "../../data/resume-data";
 import Header from "./header";
+import styles from "./index.module.css";
 
 export default function Resume() {
   return (
@@ -20,27 +21,27 @@ export default function Resume() {
       <Head>
         <style>{`html { background-color: white; }`}</style>
       </Head>
-      <main className="max-w-screen-lg mx-auto px-6 md:px-12 mt-12 screen:my-12 bg-white text-gray-900">
-      <Header />
-      <section className="grid gap-x-10 gap-y-4 grid-cols-1 md:grid-cols-2">
-        <div className="shrink-0 flex flex-col gap-6 justify-between">
-          <KeyPoint
-            title="Recent Work Experience"
-            entries={jobs}
-            highlightEntries
-          />
-        </div>
-        <div className="shrink-0 flex flex-col gap-6 justify-between">
-          <KeyPoint title="Education" entries={schools} />
-          <ShortList title="Tech" entries={proficiencies} />
-          <List title="Skills & Competencies" entries={skills} />
-          <List title="What I've Built" entries={built} />
-          <List title="Brands Served" entries={brands} />
-          <List title="Industries Served" entries={industries} />
-          {/* <ShortList title="Interests" entries={interests} /> */}
-        </div>
-      </section>
-    </main>
+      <main className={styles.main}>
+        <Header />
+        <section className={styles.grid}>
+          <div className={styles.col}>
+            <KeyPoint
+              title="Recent Work Experience"
+              entries={jobs}
+              highlightEntries
+            />
+          </div>
+          <div className={styles.col}>
+            <KeyPoint title="Education" entries={schools} />
+            <ShortList title="Tech" entries={proficiencies} />
+            <List title="Skills & Competencies" entries={skills} />
+            <List title="What I've Built" entries={built} />
+            <List title="Brands Served" entries={brands} />
+            <List title="Industries Served" entries={industries} />
+            {/* <ShortList title="Interests" entries={interests} /> */}
+          </div>
+        </section>
+      </main>
     </>
   );
 }
