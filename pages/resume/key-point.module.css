@@ -50,6 +50,7 @@
   justify-content: space-between;
   font-size: 1rem;
   font-weight: 300;
+  min-height: 1.5em;
 }
 
 .dateLabel {
