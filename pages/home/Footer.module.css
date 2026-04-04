@@ -1,0 +1,21 @@
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.3), transparent);
+  margin-bottom: 2rem;
+}
+
+.linksContainer {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.copyright {
+  text-align: center;
+  font-size: 10px;
+  color: #aaa;
+  letter-spacing: 0.1em;
+  margin-top: 1.5rem;
+}

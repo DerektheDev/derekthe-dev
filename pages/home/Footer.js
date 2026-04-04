@@ -1,11 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { contactLinks } from "../../data/home-data";
+import styles from "./Footer.module.css";
 
 export default function Footer() {
   return (
     <footer className="relative z-10 max-w-4xl mx-auto px-6 pb-10" aria-label="Contact">
-      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(251,146,60,0.3),transparent)', marginBottom: '2rem' }} />
-      <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div className={styles.divider} />
+      <div className={styles.linksContainer}>
         {contactLinks.map(({ href, label, icon, ariaLabel }) => (
           <a key={label} href={href} aria-label={ariaLabel}
             className="contact-link flex items-center gap-2 text-[12px] text-gray-300 hover:text-orange-400 transition-colors tracking-[0.06em]">
@@ -14,7 +15,7 @@ export default function Footer() {
           </a>
         ))}
       </div>
-      <p style={{ textAlign: 'center', fontSize: 10, color: '#aaa', letterSpacing: '0.1em', marginTop: '1.5rem' }}>
+      <p className={styles.copyright}>
         © 2026 Derek Montgomery
       </p>
     </footer>
