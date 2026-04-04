@@ -12,20 +12,21 @@ import {
   industries,
 } from "../../data/resume-data";
 import Header from "./header";
+import styles from "./index.module.css";
 
 export default function Resume() {
   return (
-    <main className="max-w-screen-lg mx-auto px-6 md:px-12 mt-12 screen:my-12">
+    <main className={styles.main}>
       <Header />
-      <section className="grid gap-x-10 gap-y-4 grid-cols-1 md:grid-cols-2">
-        <div className="shrink-0 flex flex-col gap-6 justify-between">
+      <section className={styles.grid}>
+        <div className={styles.col}>
           <KeyPoint
             title="Recent Work Experience"
             entries={jobs}
             highlightEntries
           />
         </div>
-        <div className="shrink-0 flex flex-col gap-6 justify-between">
+        <div className={styles.col}>
           <KeyPoint title="Education" entries={schools} />
           <ShortList title="Tech" entries={proficiencies} />
           <List title="Skills & Competencies" entries={skills} />
