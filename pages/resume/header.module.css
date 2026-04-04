@@ -100,6 +100,12 @@
   gap: 0.5rem;
 }
 
+@media (min-width: 768px) {
+  .contactList {
+    align-items: flex-end;
+  }
+}
+
 .contactItem {
   display: flex;
   gap: 1rem;
