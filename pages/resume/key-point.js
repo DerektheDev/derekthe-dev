@@ -1,12 +1,14 @@
+import styles from "./key-point.module.css";
+
 const KeyPoint = ({
   highlightEntries,
   title = "Default Title",
   subtitle,
   entries = [],
 }) => (
-  <div className="flex flex-col justify-between gap-6 only:h-full">
-    <h2 className="text-3xl font-normal">{title}</h2>
-    {subtitle && <h3 className="text-2xl font-semibold">{subtitle}</h3>}
+  <div className={styles.wrapper}>
+    <h2 className={styles.sectionTitle}>{title}</h2>
+    {subtitle && <h3 className={styles.sectionSubtitle}>{subtitle}</h3>}
 
     {entries.map(
       (
@@ -21,29 +23,24 @@ const KeyPoint = ({
         },
         index
       ) => {
-        let highlightClass;
-        if (highlightEntries && !suppressHighlight) {
-          highlightClass =
-            "md:border-l-[30px] border-orange-400 h-full absolute -ml-12";
-        }
+        const showHighlight = highlightEntries && !suppressHighlight;
 
         return (
-          <div key={index} className="flex flex-col gap-2">
-            <div className="relative">
-              <div className={highlightClass} />
-              <div className="flex justify-between text-base font-light">
+          <div key={index} className={styles.entry}>
+            <div className={styles.entryInner}>
+              {showHighlight && <div className={styles.highlightBar} />}
+              <div className={styles.dateRow}>
                 {dateRange && (
-                  <h3 className="text-orange-400">{dateRange.join(" - ")}</h3>
+                  <h3 className={styles.dateLabel}>{dateRange.join(" - ")}</h3>
                 )}
-                {/* <h3 className="text-gray-400">{location}</h3> */}
               </div>
-              <h3 className="text-2xl font-normal">
+              <h3 className={styles.entryTitle}>
                 {titleLink ? (
                   <a
                     href={titleLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="underline hover:no-underline"
+                    className={styles.entryLink}
                   >
                     {title}
                   </a>
@@ -51,11 +48,11 @@ const KeyPoint = ({
                   title
                 )}
               </h3>
-              <h4 className="text-2xl font-light">{subtitle}</h4>
+              <h4 className={styles.entrySubtitle}>{subtitle}</h4>
             </div>
-            <ul className="flex flex-col gap-2">
+            <ul className={styles.bullets}>
               {bullets.map((bullet, index) => (
-                <li key={index} className="font-light">
+                <li key={index} className={styles.bullet}>
                   {bullet}
                 </li>
               ))}

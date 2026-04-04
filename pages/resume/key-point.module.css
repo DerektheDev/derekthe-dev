@@ -1,0 +1,87 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.wrapper:only-child {
+  height: 100%;
+}
+
+.sectionTitle {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 400;
+}
+
+.sectionSubtitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.entryInner {
+  position: relative;
+}
+
+.highlightBar {
+  border-left: 30px solid #fb923c;
+  height: 100%;
+  position: absolute;
+  margin-left: -3rem;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .highlightBar {
+    display: block;
+  }
+}
+
+.dateRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+.dateLabel {
+  color: #fb923c;
+}
+
+.entryTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+}
+
+.entryLink {
+  text-decoration: underline;
+}
+
+.entryLink:hover {
+  text-decoration: none;
+}
+
+.entrySubtitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 300;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bullet {
+  font-weight: 300;
+}
