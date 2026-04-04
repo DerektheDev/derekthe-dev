@@ -1,0 +1,64 @@
+<h2>Aurora color palette</h2>
+<p class="subtitle">Your site currently uses orange (#fb923c) as its accent. Which palette feels right for the aurora?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="cool" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:140px;background:#0d0d1a;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:110%;height:180px;top:-40px;left:-5%;background:radial-gradient(ellipse at 30% 60%,rgba(99,102,241,0.7) 0%,transparent 55%);filter:blur(28px);animation:drift1 8s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:90%;height:160px;top:-20px;left:20%;background:radial-gradient(ellipse at 60% 40%,rgba(139,92,246,0.6) 0%,transparent 55%);filter:blur(32px);animation:drift2 11s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:140px;top:20px;left:10%;background:radial-gradient(ellipse at 50% 80%,rgba(20,184,166,0.55) 0%,transparent 50%);filter:blur(24px);animation:drift3 14s ease-in-out infinite;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Stripe / Cool</h3>
+      <p>Indigo · Violet · Teal — classic aurora look, closest to Stripe's redesign</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="warm" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:140px;background:#0d0d0a;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:110%;height:180px;top:-40px;left:-5%;background:radial-gradient(ellipse at 30% 60%,rgba(251,146,60,0.65) 0%,transparent 55%);filter:blur(28px);animation:drift1 8s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:90%;height:160px;top:-20px;left:20%;background:radial-gradient(ellipse at 60% 40%,rgba(236,72,153,0.5) 0%,transparent 55%);filter:blur(32px);animation:drift2 11s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:140px;top:20px;left:10%;background:radial-gradient(ellipse at 50% 80%,rgba(245,158,11,0.5) 0%,transparent 50%);filter:blur(24px);animation:drift3 14s ease-in-out infinite;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>On-brand Warm</h3>
+      <p>Orange · Amber · Pink — ties directly to your existing accent color</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:140px;background:#0a0a14;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:110%;height:180px;top:-40px;left:-5%;background:radial-gradient(ellipse at 30% 60%,rgba(251,146,60,0.55) 0%,transparent 55%);filter:blur(28px);animation:drift1 8s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:90%;height:160px;top:-20px;left:20%;background:radial-gradient(ellipse at 60% 40%,rgba(99,102,241,0.5) 0%,transparent 55%);filter:blur(32px);animation:drift2 11s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:140px;top:20px;left:10%;background:radial-gradient(ellipse at 50% 80%,rgba(236,72,153,0.45) 0%,transparent 50%);filter:blur(24px);animation:drift3 14s ease-in-out infinite;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Hybrid</h3>
+      <p>Orange · Indigo · Magenta — aurora fluidity with orange still present</p>
+    </div>
+  </div>
+
+</div>
+
+<style>
+@keyframes drift1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(3%,-8%) scale(1.1); }
+}
+@keyframes drift2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40% { transform: translate(-5%,6%) scale(0.9); }
+  70% { transform: translate(4%,-4%) scale(1.05); }
+}
+@keyframes drift3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  60% { transform: translate(5%,5%) scale(1.08); }
+}
+</style>

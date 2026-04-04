@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Ribbons — WebGL Geometry</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#1a1a1a;overflow:hidden}
+  canvas{position:fixed;inset:0;width:100vw;height:100vh}
+  .overlay{
+    position:fixed;inset:0;z-index:10;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:12px;
+    pointer-events:none;
+  }
+  .avatar{
+    width:64px;height:64px;border-radius:50%;background:#fb923c;
+    box-shadow:0 0 0 4px #1a1a1a,0 0 0 6px #fb923c,0 0 32px 6px rgba(251,146,60,0.45);
+  }
+  .name{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:48px;font-weight:400;letter-spacing:0.04em;color:#fff;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5);
+  }
+  .sub{
+    font-family:-apple-system,sans-serif;font-size:13px;
+    color:rgba(255,255,255,0.55);letter-spacing:0.18em;text-transform:uppercase;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="overlay">
+  <div class="avatar"></div>
+  <div class="name">Derek Montgomery</div>
+  <div class="sub">Senior Software Engineer</div>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const gl = canvas.getContext('webgl', { alpha: false, antialias: true });
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio, 2);
+  canvas.width  = innerWidth  * dpr;
+  canvas.height = innerHeight * dpr;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+addEventListener('resize', resize);
+
+// ─── Shaders ───────────────────────────────────────────
+const vsSrc = `
+  attribute vec3 a_pos;
+  attribute vec4 a_col;
+  attribute float a_alpha;
+  uniform mat4 u_proj;
+  uniform mat4 u_view;
+  uniform float u_time;
+  varying vec4 v_col;
+  varying float v_alpha;
+  void main() {
+    gl_Position = u_proj * u_view * vec4(a_pos, 1.0);
+    v_col = a_col;
+    v_alpha = a_alpha;
+  }
+`;
+const fsSrc = `
+  precision mediump float;
+  varying vec4 v_col;
+  varying float v_alpha;
+  void main() {
+    // Soft edge fade from center of ribbon
+    gl_FragColor = vec4(v_col.rgb, v_col.a * v_alpha);
+  }
+`;
+
+function mkShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    console.error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, vsSrc));
+gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, fsSrc));
+gl.linkProgram(prog);
+gl.useProgram(prog);
+
+// ─── Uniforms ──────────────────────────────────────────
+const uProj = gl.getUniformLocation(prog, 'u_proj');
+const uView = gl.getUniformLocation(prog, 'u_view');
+const uTime = gl.getUniformLocation(prog, 'u_time');
+
+// ─── Attributes ────────────────────────────────────────
+const aPos   = gl.getAttribLocation(prog, 'a_pos');
+const aCol   = gl.getAttribLocation(prog, 'a_col');
+const aAlpha = gl.getAttribLocation(prog, 'a_alpha');
+
+// ─── Matrix helpers ────────────────────────────────────
+function perspective(fov, aspect, near, far) {
+  const f = 1 / Math.tan(fov / 2);
+  const nf = 1 / (near - far);
+  return new Float32Array([
+    f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0
+  ]);
+}
+function mat4Ident() {
+  return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+}
+function mat4RotY(a) {
+  const c=Math.cos(a), s=Math.sin(a);
+  return new Float32Array([c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1]);
+}
+function mat4RotX(a) {
+  const c=Math.cos(a), s=Math.sin(a);
+  return new Float32Array([1,0,0,0, 0,c,-s,0, 0,s,c,0, 0,0,0,1]);
+}
+function mat4RotZ(a) {
+  const c=Math.cos(a), s=Math.sin(a);
+  return new Float32Array([c,-s,0,0, s,c,0,0, 0,0,1,0, 0,0,0,1]);
+}
+function mat4Translate(x,y,z) {
+  return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);
+}
+function mat4Mul(a, b) {
+  const o = new Float32Array(16);
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++) {
+    o[j*4+i] = a[i]*b[j*4] + a[4+i]*b[j*4+1] + a[8+i]*b[j*4+2] + a[12+i]*b[j*4+3];
+  }
+  return o;
+}
+
+// ─── Ribbon geometry builder ───────────────────────────
+// Builds a smooth triangle strip along a 3D curve
+function buildRibbon(curveFn, colorFn, nSeg, width, time) {
+  // 6 floats per vert: xyz + rgba (r,g,b packed into color attr) + alpha
+  // triangle strip: 2 verts per segment
+  const verts = []; // x,y,z, r,g,b,a, edgeAlpha
+
+  for (let i = 0; i <= nSeg; i++) {
+    const t = i / nSeg;
+
+    // Get point on curve
+    const p = curveFn(t, time);
+
+    // Get tangent via finite difference
+    const dt = 0.001;
+    const pNext = curveFn(Math.min(t + dt, 1), time);
+    const pPrev = curveFn(Math.max(t - dt, 0), time);
+    const tang = [
+      pNext[0]-pPrev[0], pNext[1]-pPrev[1], pNext[2]-pPrev[2]
+    ];
+    const tLen = Math.sqrt(tang[0]**2+tang[1]**2+tang[2]**2) || 1;
+    tang[0]/=tLen; tang[1]/=tLen; tang[2]/=tLen;
+
+    // Up vector — mostly Y, tilted slightly for visual interest
+    let up = [0, 1, 0];
+
+    // Binormal = tangent × up
+    let bn = [
+      tang[1]*up[2]-tang[2]*up[1],
+      tang[2]*up[0]-tang[0]*up[2],
+      tang[0]*up[1]-tang[1]*up[0]
+    ];
+    let bLen = Math.sqrt(bn[0]**2+bn[1]**2+bn[2]**2);
+    if (bLen < 0.001) {
+      up = [1, 0, 0];
+      bn = [
+        tang[1]*up[2]-tang[2]*up[1],
+        tang[2]*up[0]-tang[0]*up[2],
+        tang[0]*up[1]-tang[1]*up[0]
+      ];
+      bLen = Math.sqrt(bn[0]**2+bn[1]**2+bn[2]**2);
+    }
+    bn[0]/=bLen; bn[1]/=bLen; bn[2]/=bLen;
+
+    // Normal = binormal × tangent
+    const norm = [
+      bn[1]*tang[2]-bn[2]*tang[1],
+      bn[2]*tang[0]-bn[0]*tang[2],
+      bn[0]*tang[1]-bn[1]*tang[0]
+    ];
+
+    const col = colorFn(t);
+    const hw = width * 0.5;
+
+    // Vary width along ribbon for organic taper
+    const taper = Math.sin(t * Math.PI) * 0.6 + 0.4;
+    const w = hw * taper;
+
+    // Two verts: left and right of center
+    // Left
+    verts.push(
+      p[0] + bn[0]*w, p[1] + bn[1]*w, p[2] + bn[2]*w,
+      col[0], col[1], col[2], col[3],
+      0.15  // edge — more transparent
+    );
+    // Right
+    verts.push(
+      p[0] - bn[0]*w, p[1] - bn[1]*w, p[2] - bn[2]*w,
+      col[0], col[1], col[2], col[3],
+      0.15
+    );
+  }
+
+  // Add center strip for brighter core
+  // Actually, let's use a single strip but modulate alpha across it
+  // Re-do: for each segment, emit 4 verts (left-edge, left-mid, right-mid, right-edge)
+  // That's more complex. Instead, just build the strip and let the glow handle it.
+
+  return new Float32Array(verts);
+}
+
+// ─── Define 3 helical ribbon curves ────────────────────
+const TURNS = 2.5;
+const R = 1.8;       // helix radius
+const PITCH = 4.0;   // total vertical span
+
+function makeHelixCurve(phaseOffset, wobbleAmt) {
+  return function(t, time) {
+    const angle = t * TURNS * Math.PI * 2 + phaseOffset;
+    let y = (t - 0.5) * PITCH;
+
+    // Base helix
+    let x = R * Math.cos(angle);
+    let z = R * Math.sin(angle);
+
+    // Organic wobble — slow sin perturbations
+    x += Math.sin(t * 5.0 + time * 0.6) * wobbleAmt;
+    y += Math.sin(t * 3.7 + time * 0.4 + phaseOffset) * wobbleAmt * 0.6;
+    z += Math.cos(t * 4.3 + time * 0.5 + phaseOffset * 0.5) * wobbleAmt;
+
+    // Secondary slower undulation
+    x += Math.sin(t * 2.1 + time * 0.2) * wobbleAmt * 1.5;
+    z += Math.cos(t * 1.8 + time * 0.25) * wobbleAmt * 1.2;
+
+    return [x, y, z];
+  };
+}
+
+function makeColorFn(c1, c2) {
+  return function(t) {
+    const r = c1[0] + (c2[0]-c1[0]) * t;
+    const g = c1[1] + (c2[1]-c1[1]) * t;
+    const b = c1[2] + (c2[2]-c1[2]) * t;
+    // Alpha: fade at ends
+    const endFade = Math.sin(t * Math.PI);
+    return [r, g, b, endFade * 0.85];
+  };
+}
+
+const ribbonDefs = [
+  {
+    curve: makeHelixCurve(0, 0.25),
+    color: makeColorFn([0.984,0.573,0.235], [0.961,0.620,0.043]),
+    width: 0.7,
+  },
+  {
+    curve: makeHelixCurve(Math.PI*2/3, 0.3),
+    color: makeColorFn([0.961,0.620,0.043], [0.925,0.282,0.600]),
+    width: 0.55,
+  },
+  {
+    curve: makeHelixCurve(Math.PI*4/3, 0.2),
+    color: makeColorFn([0.925,0.282,0.600], [0.984,0.573,0.235]),
+    width: 0.5,
+  },
+];
+
+// ─── GL state ──────────────────────────────────────────
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE); // additive for glow
+gl.disable(gl.DEPTH_TEST);          // all ribbons blend, no occlusion
+gl.clearColor(0.102, 0.102, 0.102, 1); // #1a1a1a
+
+const SEGMENTS = 300;
+const buf = gl.createBuffer();
+
+const start = performance.now();
+
+function draw() {
+  const time = (performance.now() - start) / 1000;
+  const W = canvas.width, H = canvas.height;
+
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Projection
+  const proj = perspective(Math.PI / 4, W / H, 0.1, 100);
+  gl.uniformMatrix4fv(uProj, false, proj);
+
+  // Camera: slowly orbit + gentle tilt
+  const camDist = 6.0;
+  const camAngle = time * 0.12;
+  const camTilt = Math.sin(time * 0.08) * 0.15 + 0.2;
+
+  const view = mat4Mul(
+    mat4Translate(0, 0, -camDist),
+    mat4Mul(mat4RotX(camTilt), mat4RotY(camAngle))
+  );
+  gl.uniformMatrix4fv(uView, false, view);
+  gl.uniform1f(uTime, time);
+
+  // Draw each ribbon
+  ribbonDefs.forEach(def => {
+    const data = buildRibbon(def.curve, def.color, SEGMENTS, def.width, time);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+
+    // stride: 8 floats (x,y,z, r,g,b,a, edgeAlpha)
+    const stride = 8 * 4;
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, stride, 0);
+    gl.enableVertexAttribArray(aCol);
+    gl.vertexAttribPointer(aCol, 4, gl.FLOAT, false, stride, 3*4);
+    gl.enableVertexAttribArray(aAlpha);
+    gl.vertexAttribPointer(aAlpha, 1, gl.FLOAT, false, stride, 7*4);
+
+    const nVerts = (SEGMENTS + 1) * 2;
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, nVerts);
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

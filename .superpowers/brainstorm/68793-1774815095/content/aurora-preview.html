@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #fff; font-family: -apple-system, sans-serif; }
+
+  .label {
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.4);
+  }
+
+  .hero-mockup {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    background: #1a1a1a;
+    overflow: hidden;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Existing mesh blobs */
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(72px);
+  }
+  @keyframes b1 {
+    0%,100% { transform: translate(0px, 0px) scale(1); }
+    25% { transform: translate(60px, -80px) scale(1.15); }
+    50% { transform: translate(-40px, -30px) scale(0.9); }
+    75% { transform: translate(20px, 60px) scale(1.05); }
+  }
+  @keyframes b2 {
+    0%,100% { transform: translate(0px, 0px) scale(1); }
+    30% { transform: translate(-70px, 50px) scale(1.2); }
+    60% { transform: translate(50px, 80px) scale(0.85); }
+    80% { transform: translate(-20px, -60px) scale(1.1); }
+  }
+  @keyframes b3 {
+    0%,100% { transform: translate(0px, 0px) scale(1); }
+    40% { transform: translate(80px, 40px) scale(0.9); }
+    70% { transform: translate(-50px, 70px) scale(1.15); }
+  }
+  @keyframes b4 {
+    0%,100% { transform: translate(0px, 0px) scale(1); }
+    35% { transform: translate(-60px, -40px) scale(1.1); }
+    65% { transform: translate(40px, 50px) scale(0.9); }
+  }
+
+  /* Hero content overlay */
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #fb923c;
+    border: 2px solid #fb923c;
+    box-shadow: 0 0 20px rgba(251,146,60,0.5);
+  }
+  .hero-name {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+  .hero-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .note {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+    background: #0d0d0d;
+  }
+  .note span { color: rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora preview — warm palette · medium animation · hero only</div>
+
+<div class="hero-mockup">
+  <!-- Aurora canvas -->
+  <canvas id="aurora"></canvas>
+
+  <!-- Existing mesh blobs (kept as-is) -->
+  <div class="mesh-bg">
+    <div class="blob" style="width:320px;height:320px;top:5%;left:20%;background:rgba(251,146,60,0.22);animation:b1 14s ease-in-out infinite"></div>
+    <div class="blob" style="width:250px;height:250px;top:30%;left:55%;background:rgba(234,88,12,0.18);animation:b2 18s ease-in-out infinite"></div>
+    <div class="blob" style="width:280px;height:220px;top:50%;left:10%;background:rgba(249,115,22,0.15);animation:b3 22s ease-in-out infinite"></div>
+    <div class="blob" style="width:210px;height:210px;top:10%;left:65%;background:rgba(180,50,10,0.18);animation:b4 16s ease-in-out infinite"></div>
+  </div>
+
+  <!-- Hero content -->
+  <div class="hero-content">
+    <div class="avatar"></div>
+    <div class="hero-name">Derek Montgomery</div>
+    <div class="hero-sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  Aurora canvas layers above the existing blobs · <span>screen</span> blend mode · 4 sinusoidal bands
+</div>
+
+<script>
+const canvas = document.getElementById('aurora');
+const ctx = canvas.getContext('2d');
+let animId;
+
+function resize() {
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth;
+  canvas.height = parent.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const bands = [
+  { yFrac: 0.15, color: [251, 146, 60],  thickness: 90,  phase: 0,    speed: 0.006, amplitude: 28, freq: 1.8, breatheOffset: 0,    breathePeriod: 14000 },
+  { yFrac: 0.32, color: [251, 146, 60],  thickness: 120, phase: 1.2,  speed: 0.005, amplitude: 38, freq: 1.4, breatheOffset: 2000, breathePeriod: 17000 },
+  { yFrac: 0.52, color: [245, 158, 11],  thickness: 100, phase: 2.5,  speed: 0.007, amplitude: 32, freq: 2.0, breatheOffset: 4000, breathePeriod: 12000 },
+  { yFrac: 0.68, color: [236, 72,  153], thickness: 85,  phase: 0.8,  speed: 0.0045,amplitude: 24, freq: 1.6, breatheOffset: 6000, breathePeriod: 19000 },
+];
+
+function drawBand(band, now) {
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Vertical breathing
+  const breathe = Math.sin((now + band.breatheOffset) / band.breathePeriod * Math.PI * 2) * 0.04;
+  const cy = (band.yFrac + breathe) * H;
+  const half = band.thickness / 2;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = 0.42;
+
+  // Build path
+  const steps = 120;
+  ctx.beginPath();
+  // Top edge
+  for (let i = 0; i <= steps; i++) {
+    const x = (i / steps) * W;
+    const y = cy - half + Math.sin(x / W * Math.PI * 2 * band.freq + band.phase) * band.amplitude;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  // Bottom edge (reverse)
+  for (let i = steps; i >= 0; i--) {
+    const x = (i / steps) * W;
+    const y = cy + half + Math.sin(x / W * Math.PI * 2 * band.freq + band.phase + Math.PI * 0.3) * band.amplitude;
+    ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, cy - half - band.amplitude, 0, cy + half + band.amplitude);
+  const [r, g, b] = band.color;
+  grad.addColorStop(0,   `rgba(${r},${g},${b},0)`);
+  grad.addColorStop(0.3, `rgba(${r},${g},${b},0.7)`);
+  grad.addColorStop(0.5, `rgba(${r},${g},${b},1)`);
+  grad.addColorStop(0.7, `rgba(${r},${g},${b},0.7)`);
+  grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function draw(now) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  bands.forEach(band => {
+    band.phase += band.speed;
+    drawBand(band, now);
+  });
+  animId = requestAnimationFrame(draw);
+}
+
+animId = requestAnimationFrame(draw);
+</script>
+</body>
+</html>

@@ -79,9 +79,9 @@ export default function WorkCards() {
                   justifyContent: 'center',
                 }}
               >
-                {p.logo && (
+                {/* {p.logo && (
                   <img src={p.logo} alt={`${p.name} logo`} style={p.logoStyle} />
-                )}
+                )} */}
                 <div style={{
                   position: 'absolute', bottom: 10, left: 12,
                   fontFamily: "'Bebas Neue', sans-serif",

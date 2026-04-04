@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora SVG Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #fff; font-family: -apple-system, sans-serif; }
+
+  .label {
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.4);
+  }
+
+  .hero-mockup {
+    position: relative;
+    width: 100%;
+    height: 340px;
+    background: #1a1a1a;
+    overflow: hidden;
+  }
+
+  .aurora-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(72px);
+  }
+  @keyframes b1 {
+    0%,100% { transform: translate(0px,0px) scale(1); }
+    25% { transform: translate(60px,-80px) scale(1.15); }
+    50% { transform: translate(-40px,-30px) scale(0.9); }
+    75% { transform: translate(20px,60px) scale(1.05); }
+  }
+  @keyframes b2 {
+    0%,100% { transform: translate(0px,0px) scale(1); }
+    30% { transform: translate(-70px,50px) scale(1.2); }
+    60% { transform: translate(50px,80px) scale(0.85); }
+    80% { transform: translate(-20px,-60px) scale(1.1); }
+  }
+  @keyframes b3 {
+    0%,100% { transform: translate(0px,0px) scale(1); }
+    40% { transform: translate(80px,40px) scale(0.9); }
+    70% { transform: translate(-50px,70px) scale(1.15); }
+  }
+
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #fb923c;
+    box-shadow: 0 0 0 3px #1a1a1a, 0 0 0 5px #fb923c, 0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .hero-name { font-size: 36px; font-weight: 700; letter-spacing: 0.04em; color: #fff; }
+  .hero-sub { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.15em; text-transform: uppercase; }
+
+  .note {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+    background: #0d0d0d;
+  }
+  .note span { color: rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora preview — SVG turbulence · warm palette · medium animation</div>
+
+<div class="hero-mockup">
+
+  <!-- SVG Aurora -->
+  <svg class="aurora-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="aurora-warp" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence id="turb" type="turbulence" baseFrequency="0.004 0.008" numOctaves="3" seed="5" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="90" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <!-- Orange band gradient -->
+      <linearGradient id="gOrange" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(251,146,60,0)"/>
+        <stop offset="35%"  stop-color="rgba(251,146,60,0.75)"/>
+        <stop offset="65%"  stop-color="rgba(251,146,60,0.75)"/>
+        <stop offset="100%" stop-color="rgba(251,146,60,0)"/>
+      </linearGradient>
+
+      <!-- Amber band gradient -->
+      <linearGradient id="gAmber" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(245,158,11,0)"/>
+        <stop offset="35%"  stop-color="rgba(245,158,11,0.65)"/>
+        <stop offset="65%"  stop-color="rgba(245,158,11,0.65)"/>
+        <stop offset="100%" stop-color="rgba(245,158,11,0)"/>
+      </linearGradient>
+
+      <!-- Pink band gradient -->
+      <linearGradient id="gPink" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(236,72,153,0)"/>
+        <stop offset="35%"  stop-color="rgba(236,72,153,0.55)"/>
+        <stop offset="65%"  stop-color="rgba(236,72,153,0.55)"/>
+        <stop offset="100%" stop-color="rgba(236,72,153,0)"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Aurora bands — filtered group for organic warping -->
+    <g filter="url(#aurora-warp)" style="mix-blend-mode:screen; opacity:0.85">
+      <!-- Band 1: orange, upper -->
+      <rect id="b1" x="-10%" y="8%" width="120%" height="22%" fill="url(#gOrange)"/>
+      <!-- Band 2: amber, mid -->
+      <rect id="b2" x="-10%" y="32%" width="120%" height="26%" fill="url(#gAmber)"/>
+      <!-- Band 3: pink, lower-mid -->
+      <rect id="b3" x="-10%" y="52%" width="120%" height="20%" fill="url(#gPink)"/>
+      <!-- Band 4: orange accent, near top -->
+      <rect id="b4" x="-10%" y="-2%" width="120%" height="16%" fill="url(#gOrange)" opacity="0.5"/>
+    </g>
+  </svg>
+
+  <!-- Existing mesh blobs (kept) -->
+  <div class="mesh-bg">
+    <div class="blob" style="width:320px;height:320px;top:5%;left:20%;background:rgba(251,146,60,0.22);animation:b1 14s ease-in-out infinite"></div>
+    <div class="blob" style="width:250px;height:250px;top:30%;left:55%;background:rgba(234,88,12,0.18);animation:b2 18s ease-in-out infinite"></div>
+    <div class="blob" style="width:280px;height:220px;top:50%;left:10%;background:rgba(249,115,22,0.15);animation:b3 22s ease-in-out infinite"></div>
+  </div>
+
+  <!-- Hero content -->
+  <div class="hero-content">
+    <div class="avatar"></div>
+    <div class="hero-name">Derek Montgomery</div>
+    <div class="hero-sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  SVG <span>feTurbulence + feDisplacementMap</span> · bands warp organically · screen blend mode
+</div>
+
+<script>
+  const turb = document.getElementById('turb');
+  const b1 = document.getElementById('b1');
+  const b2 = document.getElementById('b2');
+  const b3 = document.getElementById('b3');
+  const b4 = document.getElementById('b4');
+
+  let t = 0;
+  const start = performance.now();
+
+  function animate(now) {
+    t = (now - start) / 1000; // seconds
+
+    // Slowly evolve turbulence — gives organic shape-shifting
+    const bfx = 0.004 + Math.sin(t * 0.07) * 0.0015;
+    const bfy = 0.008 + Math.cos(t * 0.05) * 0.002;
+    turb.setAttribute('baseFrequency', `${bfx.toFixed(5)} ${bfy.toFixed(5)}`);
+
+    // Gentle vertical drift per band
+    const y1 = 8  + Math.sin(t * 0.08) * 4;
+    const y2 = 32 + Math.sin(t * 0.06 + 1.2) * 5;
+    const y3 = 52 + Math.sin(t * 0.07 + 2.5) * 4;
+    const y4 = -2 + Math.sin(t * 0.09 + 0.8) * 3;
+
+    b1.setAttribute('y', y1 + '%');
+    b2.setAttribute('y', y2 + '%');
+    b3.setAttribute('y', y3 + '%');
+    b4.setAttribute('y', y4 + '%');
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>

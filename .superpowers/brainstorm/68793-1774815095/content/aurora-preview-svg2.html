@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora SVG v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #fff; font-family: -apple-system, sans-serif; }
+  .label {
+    text-align: center; padding: 14px;
+    font-size: 12px; letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.45); text-transform: uppercase;
+    background: rgba(0,0,0,0.4);
+  }
+  .hero-mockup {
+    position: relative; width: 100%; height: 340px;
+    background: #1a1a1a; overflow: hidden;
+  }
+  .aurora-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .mesh-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(72px); }
+  @keyframes b1 {
+    0%,100%{transform:translate(0,0) scale(1)} 25%{transform:translate(60px,-80px) scale(1.15)}
+    50%{transform:translate(-40px,-30px) scale(0.9)} 75%{transform:translate(20px,60px) scale(1.05)}
+  }
+  @keyframes b2 {
+    0%,100%{transform:translate(0,0) scale(1)} 30%{transform:translate(-70px,50px) scale(1.2)}
+    60%{transform:translate(50px,80px) scale(0.85)} 80%{transform:translate(-20px,-60px) scale(1.1)}
+  }
+  @keyframes b3 {
+    0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(80px,40px) scale(0.9)}
+    70%{transform:translate(-50px,70px) scale(1.15)}
+  }
+  .hero-content {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%; background: #fb923c;
+    box-shadow: 0 0 0 3px #1a1a1a, 0 0 0 5px #fb923c, 0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .hero-name { font-size: 36px; font-weight: 700; letter-spacing: 0.04em; color: #fff; }
+  .hero-sub { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.15em; text-transform: uppercase; }
+  .note {
+    text-align: center; padding: 16px; font-size: 12px;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.06em; background: #0d0d0d;
+  }
+  .note span { color: rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora v2 — defined edges · flame-wave hybrid · warm palette</div>
+
+<div class="hero-mockup">
+  <svg class="aurora-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Turbulence: low X freq, higher Y freq → horizontal bands with vertical lick -->
+      <feTurbulence id="turb" type="fractalNoise"
+        baseFrequency="0.006 0.018" numOctaves="2" seed="8" result="noise"/>
+
+      <!-- Boost contrast so bands have crispier edges instead of smoky bleed -->
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 6 -2 0"
+        in="noise" result="sharpNoise"/>
+
+      <filter id="warp-orange" x="-10%" y="-30%" width="120%" height="160%"
+              color-interpolation-filters="sRGB" primitiveUnits="userSpaceOnUse">
+        <feTurbulence id="turbO" type="fractalNoise"
+          baseFrequency="0.006 0.02" numOctaves="2" seed="3" result="n"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 5 -1.5 0"
+          in="n" result="sn"/>
+        <feDisplacementMap in="SourceGraphic" in2="sn" scale="42"
+          xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <filter id="warp-amber" x="-10%" y="-30%" width="120%" height="160%"
+              color-interpolation-filters="sRGB" primitiveUnits="userSpaceOnUse">
+        <feTurbulence id="turbA" type="fractalNoise"
+          baseFrequency="0.007 0.022" numOctaves="2" seed="11" result="n"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 5 -1.5 0"
+          in="n" result="sn"/>
+        <feDisplacementMap in="SourceGraphic" in2="sn" scale="38"
+          xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <filter id="warp-pink" x="-10%" y="-30%" width="120%" height="160%"
+              color-interpolation-filters="sRGB" primitiveUnits="userSpaceOnUse">
+        <feTurbulence id="turbP" type="fractalNoise"
+          baseFrequency="0.005 0.019" numOctaves="2" seed="17" result="n"/>
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 5 -1.5 0"
+          in="n" result="sn"/>
+        <feDisplacementMap in="SourceGraphic" in2="sn" scale="36"
+          xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <!-- Sharp-edged gradients — tight center, steep fade -->
+      <linearGradient id="gOrange" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(251,146,60,0)"/>
+        <stop offset="25%"  stop-color="rgba(251,146,60,0.9)"/>
+        <stop offset="55%"  stop-color="rgba(251,146,60,0.85)"/>
+        <stop offset="100%" stop-color="rgba(251,146,60,0)"/>
+      </linearGradient>
+
+      <linearGradient id="gAmber" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(245,158,11,0)"/>
+        <stop offset="28%"  stop-color="rgba(245,158,11,0.82)"/>
+        <stop offset="60%"  stop-color="rgba(245,158,11,0.78)"/>
+        <stop offset="100%" stop-color="rgba(245,158,11,0)"/>
+      </linearGradient>
+
+      <linearGradient id="gPink" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="rgba(236,72,153,0)"/>
+        <stop offset="28%"  stop-color="rgba(236,72,153,0.72)"/>
+        <stop offset="62%"  stop-color="rgba(236,72,153,0.68)"/>
+        <stop offset="100%" stop-color="rgba(236,72,153,0)"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Each band gets its own filter so they warp independently -->
+    <g style="mix-blend-mode:screen">
+      <rect id="b1" x="-10%" y="4%"  width="120%" height="26%" fill="url(#gOrange)" filter="url(#warp-orange)" opacity="0.9"/>
+      <rect id="b2" x="-10%" y="30%" width="120%" height="28%" fill="url(#gAmber)"  filter="url(#warp-amber)"  opacity="0.85"/>
+      <rect id="b3" x="-10%" y="54%" width="120%" height="24%" fill="url(#gPink)"   filter="url(#warp-pink)"   opacity="0.8"/>
+      <rect id="b4" x="-10%" y="-4%" width="120%" height="18%" fill="url(#gOrange)" filter="url(#warp-orange)" opacity="0.5"/>
+    </g>
+  </svg>
+
+  <!-- Existing mesh blobs -->
+  <div class="mesh-bg">
+    <div class="blob" style="width:320px;height:320px;top:5%;left:20%;background:rgba(251,146,60,0.22);animation:b1 14s ease-in-out infinite"></div>
+    <div class="blob" style="width:250px;height:250px;top:30%;left:55%;background:rgba(234,88,12,0.18);animation:b2 18s ease-in-out infinite"></div>
+    <div class="blob" style="width:280px;height:220px;top:50%;left:10%;background:rgba(249,115,22,0.15);animation:b3 22s ease-in-out infinite"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="avatar"></div>
+    <div class="hero-name">Derek Montgomery</div>
+    <div class="hero-sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  Separate filter per band · <span>fractalNoise</span> + sharp feColorMatrix · scale 36–42 · screen blend
+</div>
+
+<script>
+  const turbO = document.getElementById('turbO');
+  const turbA = document.getElementById('turbA');
+  const turbP = document.getElementById('turbP');
+  const b1 = document.getElementById('b1');
+  const b2 = document.getElementById('b2');
+  const b3 = document.getElementById('b3');
+  const b4 = document.getElementById('b4');
+  const start = performance.now();
+
+  function animate(now) {
+    const t = (now - start) / 1000;
+
+    // Each band's turbulence evolves at slightly different rates
+    const bfxO = 0.006 + Math.sin(t * 0.06) * 0.0018;
+    const bfyO = 0.020 + Math.cos(t * 0.04) * 0.003;
+    turbO.setAttribute('baseFrequency', `${bfxO.toFixed(5)} ${bfyO.toFixed(5)}`);
+
+    const bfxA = 0.007 + Math.sin(t * 0.05 + 1.0) * 0.0015;
+    const bfyA = 0.022 + Math.cos(t * 0.035 + 0.5) * 0.003;
+    turbA.setAttribute('baseFrequency', `${bfxA.toFixed(5)} ${bfyA.toFixed(5)}`);
+
+    const bfxP = 0.005 + Math.sin(t * 0.07 + 2.0) * 0.0012;
+    const bfyP = 0.019 + Math.cos(t * 0.045 + 1.5) * 0.0025;
+    turbP.setAttribute('baseFrequency', `${bfxP.toFixed(5)} ${bfyP.toFixed(5)}`);
+
+    // Gentle vertical drift
+    b1.setAttribute('y', (4  + Math.sin(t * 0.09) * 3.5) + '%');
+    b2.setAttribute('y', (30 + Math.sin(t * 0.07 + 1.2) * 4) + '%');
+    b3.setAttribute('y', (54 + Math.sin(t * 0.08 + 2.4) * 3) + '%');
+    b4.setAttribute('y', (-4 + Math.sin(t * 0.10 + 0.6) * 2.5) + '%');
+
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>

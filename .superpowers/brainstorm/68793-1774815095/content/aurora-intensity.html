@@ -1,0 +1,66 @@
+<h2>Animation character</h2>
+<p class="subtitle">How much should the aurora move?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="subtle" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:160px;background:#111008;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:100%;height:200px;top:-50px;left:0;background:radial-gradient(ellipse at 35% 55%,rgba(251,146,60,0.28) 0%,transparent 60%);filter:blur(40px);animation:s1 20s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:180px;top:-30px;left:25%;background:radial-gradient(ellipse at 55% 45%,rgba(236,72,153,0.22) 0%,transparent 55%);filter:blur(44px);animation:s2 26s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:70%;height:150px;top:30px;left:15%;background:radial-gradient(ellipse at 45% 70%,rgba(245,158,11,0.2) 0%,transparent 50%);filter:blur(36px);animation:s3 32s ease-in-out infinite;"></div>
+      </div>
+      <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;">watch for slow drift...</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Subtle</h3>
+      <p>Very slow drift, low opacity. Nearly static — you notice it, but it doesn't distract.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="medium" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:160px;background:#110d05;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:100%;height:200px;top:-50px;left:0;background:radial-gradient(ellipse at 35% 55%,rgba(251,146,60,0.48) 0%,transparent 58%);filter:blur(32px);animation:m1 10s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:180px;top:-30px;left:25%;background:radial-gradient(ellipse at 55% 45%,rgba(236,72,153,0.38) 0%,transparent 52%);filter:blur(36px);animation:m2 13s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:70%;height:150px;top:30px;left:15%;background:radial-gradient(ellipse at 45% 70%,rgba(245,158,11,0.35) 0%,transparent 48%);filter:blur(28px);animation:m3 16s ease-in-out infinite;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Medium (Stripe-like)</h3>
+      <p>Visible, fluid motion. Rich colors. The aurora is clearly alive but not overwhelming.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="dynamic" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:160px;background:#120b00;overflow:hidden;position:relative;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;width:120%;height:220px;top:-60px;left:-10%;background:radial-gradient(ellipse at 35% 55%,rgba(251,146,60,0.72) 0%,transparent 55%);filter:blur(22px);animation:d1 5s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:90%;height:190px;top:-20px;left:20%;background:radial-gradient(ellipse at 55% 45%,rgba(236,72,153,0.58) 0%,transparent 50%);filter:blur(26px);animation:d2 7s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:80%;height:160px;top:20px;left:10%;background:radial-gradient(ellipse at 45% 70%,rgba(245,158,11,0.55) 0%,transparent 45%);filter:blur(20px);animation:d3 9s ease-in-out infinite;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dynamic</h3>
+      <p>Fast, vivid, high-saturation movement. Eye-catching — more energy, more distraction.</p>
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* Subtle */
+@keyframes s1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(2%,-5%) scale(1.04)} }
+@keyframes s2 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-3%,4%) scale(0.97)} 70%{transform:translate(2%,-3%) scale(1.03)} }
+@keyframes s3 { 0%,100%{transform:translate(0,0) scale(1)} 60%{transform:translate(3%,3%) scale(1.05)} }
+
+/* Medium */
+@keyframes m1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(5%,-9%) scale(1.1)} }
+@keyframes m2 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-6%,7%) scale(0.92)} 70%{transform:translate(4%,-5%) scale(1.06)} }
+@keyframes m3 { 0%,100%{transform:translate(0,0) scale(1)} 60%{transform:translate(6%,6%) scale(1.09)} }
+
+/* Dynamic */
+@keyframes d1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(9%,-14%) scale(1.18)} }
+@keyframes d2 { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-10%,11%) scale(0.86)} 65%{transform:translate(7%,-8%) scale(1.1)} }
+@keyframes d3 { 0%,100%{transform:translate(0,0) scale(1)} 55%{transform:translate(10%,9%) scale(1.14)} }
+</style>

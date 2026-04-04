@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combined — Aurora + Neural Net + Blobs</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#1a1a1a;overflow:hidden;font-family:-apple-system,sans-serif}
+
+  .hero{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+  /* Layer 1: Aurora (back) */
+  .aurora-wrap{position:absolute;inset:0;z-index:0}
+  .c-glow{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);filter:blur(32px);opacity:0.45}
+  .c-crisp{position:absolute;inset:0;width:100%;height:100%}
+
+  /* Layer 2: Mesh blobs */
+  .mesh-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+  .blob{position:absolute;border-radius:50%;filter:blur(72px)}
+  @keyframes b1{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(60px,-80px) scale(1.15)}50%{transform:translate(-40px,-30px) scale(0.9)}75%{transform:translate(20px,60px) scale(1.05)}}
+  @keyframes b2{0%,100%{transform:translate(0,0) scale(1)}30%{transform:translate(-70px,50px) scale(1.2)}60%{transform:translate(50px,80px) scale(0.85)}80%{transform:translate(-20px,-60px) scale(1.1)}}
+  @keyframes b3{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(80px,40px) scale(0.9)}70%{transform:translate(-50px,70px) scale(1.15)}}
+  @keyframes b4{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-60px,-40px) scale(1.1)}65%{transform:translate(40px,50px) scale(0.9)}}
+
+  /* Layer 3: Neural net */
+  .neural-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+
+  /* Layer 4: Content */
+  .overlay{
+    position:absolute;inset:0;z-index:10;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:10px;
+    pointer-events:none;
+  }
+  .avatar{
+    width:64px;height:64px;border-radius:50%;background:#fb923c;
+    box-shadow:0 0 0 4px #1a1a1a,0 0 0 6px #fb923c,0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .name{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:48px;font-weight:400;letter-spacing:0.04em;color:#fff;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5);
+  }
+  .sub{font-size:13px;color:rgba(255,255,255,0.55);letter-spacing:0.18em;text-transform:uppercase}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="hero">
+
+  <!-- LAYER 1: Aurora ribbons -->
+  <div class="aurora-wrap">
+    <canvas class="c-glow" id="glow"></canvas>
+    <canvas class="c-crisp" id="crisp"></canvas>
+  </div>
+
+  <!-- LAYER 2: Mesh blobs (from existing site) -->
+  <div class="mesh-bg">
+    <div class="blob" style="width:520px;height:520px;top:5%;left:20%;background:rgba(251,146,60,0.22);animation:b1 14s ease-in-out infinite"></div>
+    <div class="blob" style="width:400px;height:400px;top:30%;left:55%;background:rgba(234,88,12,0.18);animation:b2 18s ease-in-out infinite"></div>
+    <div class="blob" style="width:460px;height:360px;top:50%;left:10%;background:rgba(249,115,22,0.15);animation:b3 22s ease-in-out infinite"></div>
+    <div class="blob" style="width:340px;height:340px;top:10%;left:65%;background:rgba(180,50,10,0.18);animation:b4 16s ease-in-out infinite"></div>
+  </div>
+
+  <!-- LAYER 3: Neural net (from existing site) -->
+  <canvas class="neural-canvas" id="neural"></canvas>
+
+  <!-- LAYER 4: Content -->
+  <div class="overlay">
+    <div class="avatar"></div>
+    <div class="name">Derek Montgomery</div>
+    <div class="sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// NEURAL NET (copied from existing NeuralBackground)
+// ═══════════════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('neural');
+  const ctx = canvas.getContext('2d');
+  let animId;
+
+  const resize = () => {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  };
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NODE_COUNT = 72;
+  const CONNECT_DIST = 180;
+
+  const nodes = Array.from({ length: NODE_COUNT }, () => ({
+    lx: (Math.random() - 0.5) * canvas.width * 1.2,
+    ly: (Math.random() - 0.5) * canvas.height * 1.2,
+    lz: (Math.random() - 0.5) * 500,
+    vx: (Math.random() - 0.5) * 0.18,
+    vy: (Math.random() - 0.5) * 0.18,
+    vz: (Math.random() - 0.5) * 0.18,
+    r: Math.random() * 1.8 + 1,
+    opacity: Math.random() * 0.25 + 0.08,
+  }));
+
+  let angleY = 0, angleX = 0;
+  const FOCAL = 700;
+
+  function project(lx, ly, lz) {
+    const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+    const wx = lx * cosY + lz * sinY;
+    const wz = -lx * sinY + lz * cosY;
+    const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+    const wy = ly * cosX - wz * sinX;
+    const fz = ly * sinX + wz * cosX;
+    const depth = FOCAL + fz;
+    if (depth < 1) return null;
+    const scale = FOCAL / depth;
+    return { sx: canvas.width/2 + wx*scale, sy: canvas.height/2 + wy*scale, scale, fz };
+  }
+
+  const signals = [];
+  const spawnSignal = () => {
+    const ai = Math.floor(Math.random() * nodes.length);
+    const bi = Math.floor(Math.random() * nodes.length);
+    if (ai === bi) return;
+    const a = nodes[ai], b = nodes[bi];
+    const dx = b.lx-a.lx, dy = b.ly-a.ly, dz = b.lz-a.lz;
+    if (Math.sqrt(dx*dx+dy*dy+dz*dz) < CONNECT_DIST)
+      signals.push({ ai, bi, t: 0, speed: Math.random()*0.004+0.003 });
+  };
+  setInterval(spawnSignal, 600);
+
+  function drawNeural() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angleY += 0.0018; angleX += 0.0007;
+    nodes.forEach(n => {
+      n.lx += n.vx; n.ly += n.vy; n.lz += n.vz;
+      const bx = canvas.width*0.65, by = canvas.height*0.65, bz = 260;
+      if (Math.abs(n.lx)>bx) n.vx *= -1;
+      if (Math.abs(n.ly)>by) n.vy *= -1;
+      if (Math.abs(n.lz)>bz) n.vz *= -1;
+    });
+    const projected = nodes.map(n => project(n.lx, n.ly, n.lz));
+    for (let i=0;i<nodes.length;i++) {
+      if (!projected[i]) continue;
+      for (let j=i+1;j<nodes.length;j++) {
+        if (!projected[j]) continue;
+        const dx=nodes[j].lx-nodes[i].lx, dy=nodes[j].ly-nodes[i].ly, dz=nodes[j].lz-nodes[i].lz;
+        const dist3d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if (dist3d<CONNECT_DIST) {
+          const proximity=1-dist3d/CONNECT_DIST;
+          const depthFade=Math.min(projected[i].scale,projected[j].scale);
+          const alpha=proximity*depthFade*0.18;
+          ctx.beginPath();
+          ctx.moveTo(projected[i].sx,projected[i].sy);
+          ctx.lineTo(projected[j].sx,projected[j].sy);
+          ctx.strokeStyle=`rgba(255,255,255,${Math.min(alpha,0.22)})`;
+          ctx.lineWidth=0.8*depthFade;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach((n,i) => {
+      const p=projected[i]; if(!p) return;
+      const r=n.r*p.scale;
+      ctx.beginPath();
+      ctx.arc(p.sx,p.sy,Math.max(r,0.5),0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${n.opacity*Math.min(p.scale*1.1,1)})`;
+      ctx.fill();
+    });
+    for (let i=signals.length-1;i>=0;i--) {
+      const s=signals[i]; s.t+=s.speed;
+      if (s.t>=1){signals.splice(i,1);continue}
+      const pa=projected[s.ai],pb=projected[s.bi];
+      if(!pa||!pb) continue;
+      const x=pa.sx+(pb.sx-pa.sx)*s.t, y=pa.sy+(pb.sy-pa.sy)*s.t;
+      const ds=pa.scale+(pb.scale-pa.scale)*s.t;
+      const glowR=5*ds;
+      const grd=ctx.createRadialGradient(x,y,0,x,y,glowR);
+      grd.addColorStop(0,`rgba(255,255,255,${0.8*ds})`);
+      grd.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.beginPath(); ctx.arc(x,y,glowR,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.fill();
+    }
+    animId=requestAnimationFrame(drawNeural);
+  }
+  drawNeural();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// AURORA RIBBONS (WebGL)
+// ═══════════════════════════════════════════════════════════
+(function() {
+function initGL(canvas) {
+  return canvas.getContext('webgl', { alpha: true, antialias: true, premultipliedAlpha: false });
+}
+const glowCanvas  = document.getElementById('glow');
+const crispCanvas = document.getElementById('crisp');
+const glGlow  = initGL(glowCanvas);
+const glCrisp = initGL(crispCanvas);
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio, 2);
+  const w = innerWidth * dpr, h = innerHeight * dpr;
+  glowCanvas.width = w; glowCanvas.height = h;
+  crispCanvas.width = w; crispCanvas.height = h;
+  glGlow.viewport(0, 0, w, h);
+  glCrisp.viewport(0, 0, w, h);
+}
+resize();
+addEventListener('resize', resize);
+
+const vsSrc = `
+  attribute vec3 a_pos;
+  attribute vec3 a_normal;
+  attribute vec4 a_col;
+  attribute float a_edge;
+  uniform mat4 u_proj;
+  uniform mat4 u_view;
+  varying vec4 v_col;
+  varying float v_edge;
+  varying vec3 v_norm;
+  varying vec3 v_worldPos;
+  void main() {
+    vec4 wp = u_view * vec4(a_pos, 1.0);
+    gl_Position = u_proj * wp;
+    v_col = a_col;
+    v_edge = a_edge;
+    v_norm = (u_view * vec4(a_normal, 0.0)).xyz;
+    v_worldPos = wp.xyz;
+  }
+`;
+const fsSrc = `
+  precision mediump float;
+  varying vec4 v_col;
+  varying float v_edge;
+  varying vec3 v_norm;
+  varying vec3 v_worldPos;
+  void main() {
+    float gauss = exp(-3.5 * v_edge * v_edge);
+    vec3 n = normalize(v_norm);
+    vec3 lightDir = normalize(vec3(0.3, 0.8, 0.5));
+    float diffuse = dot(n, lightDir) * 0.5 + 0.5;
+    float rim = 1.0 - abs(dot(normalize(-v_worldPos), n));
+    rim = pow(rim, 2.0) * 0.6;
+    vec3 lit = v_col.rgb * (diffuse * 0.7 + 0.3) + v_col.rgb * rim;
+    lit *= 0.9;
+    float alpha = gauss * v_col.a;
+    gl_FragColor = vec4(lit * alpha, alpha);
+  }
+`;
+
+function setupProgram(gl) {
+  function mkShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, vsSrc));
+  gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, fsSrc));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  gl.disable(gl.DEPTH_TEST); gl.clearColor(0, 0, 0, 0);
+  return {
+    prog,
+    uProj: gl.getUniformLocation(prog,'u_proj'),
+    uView: gl.getUniformLocation(prog,'u_view'),
+    aPos: gl.getAttribLocation(prog,'a_pos'),
+    aNormal: gl.getAttribLocation(prog,'a_normal'),
+    aCol: gl.getAttribLocation(prog,'a_col'),
+    aEdge: gl.getAttribLocation(prog,'a_edge'),
+    buf: gl.createBuffer(),
+  };
+}
+const pGlow = setupProgram(glGlow);
+const pCrisp = setupProgram(glCrisp);
+
+function perspective(fov,aspect,near,far){const f=1/Math.tan(fov/2),nf=1/(near-far);return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0])}
+function mat4Mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++)o[j*4+i]=a[i]*b[j*4]+a[4+i]*b[j*4+1]+a[8+i]*b[j*4+2]+a[12+i]*b[j*4+3];return o}
+function mat4RotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,s,0,0,1,0,0,-s,0,c,0,0,0,0,1])}
+function mat4RotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,-s,0,0,s,c,0,0,0,0,1])}
+function mat4RotZ(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,-s,0,0,s,c,0,0,0,0,1,0,0,0,0,1])}
+function mat4Trans(x,y,z){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1])}
+
+const SEGS=400, TURNS=4.0, R=5.0, PITCH=8.0;
+
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function normalize(v){const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;return[v[0]/l,v[1]/l,v[2]/l]}
+function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+
+function helixPoint(t,phase,time,wobble){
+  const angle=t*TURNS*Math.PI*2+phase;
+  let x=R*Math.cos(angle), y=(t-0.5)*PITCH, z=R*Math.sin(angle);
+  x+=Math.sin(t*5+time*0.6)*wobble;
+  y+=Math.sin(t*3.7+time*0.4+phase)*wobble*0.6;
+  z+=Math.cos(t*4.3+time*0.5+phase*0.5)*wobble;
+  x+=Math.sin(t*2.1+time*0.2)*wobble*1.5;
+  z+=Math.cos(t*1.8+time*0.25)*wobble*1.2;
+  return[x,y,z];
+}
+
+function buildRibbon(phase,wobble,c1,c2,width,time){
+  const verts=[];
+  const points=[],tangents=[];
+  for(let i=0;i<=SEGS;i++) points.push(helixPoint(i/SEGS,phase,time,wobble));
+  for(let i=0;i<=SEGS;i++) tangents.push(normalize(sub(points[Math.min(i+1,SEGS)],points[Math.max(i-1,0)])));
+  let prevNorm;
+  {const t0=tangents[0];let up=[0,1,0];let bn=normalize(cross(t0,up));
+  if(Math.sqrt(bn[0]*bn[0]+bn[1]*bn[1]+bn[2]*bn[2])<0.01){up=[1,0,0];bn=normalize(cross(t0,up))}
+  prevNorm=normalize(cross(bn,t0))}
+  const normals=[prevNorm];
+  for(let i=1;i<=SEGS;i++){
+    const t0=tangents[i-1],t1=tangents[i];
+    const b=cross(t0,t1);const bLen=Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]);
+    if(bLen<0.0001){normals.push(prevNorm)}else{
+      const axis=[b[0]/bLen,b[1]/bLen,b[2]/bLen];
+      const cosA=Math.max(-1,Math.min(1,t0[0]*t1[0]+t0[1]*t1[1]+t0[2]*t1[2]));
+      const angle=Math.acos(cosA);const c=Math.cos(angle),s=Math.sin(angle);
+      const d=axis[0]*prevNorm[0]+axis[1]*prevNorm[1]+axis[2]*prevNorm[2];
+      const cr=cross(axis,prevNorm);
+      prevNorm=[prevNorm[0]*c+cr[0]*s+axis[0]*d*(1-c),prevNorm[1]*c+cr[1]*s+axis[1]*d*(1-c),prevNorm[2]*c+cr[2]*s+axis[2]*d*(1-c)];
+      prevNorm=normalize(prevNorm);normals.push(prevNorm);
+    }
+  }
+  for(let i=0;i<=SEGS;i++){
+    const t=i/SEGS,p=points[i],norm=normals[i],tang=tangents[i];
+    const bn=normalize(cross(tang,norm));
+    const r=c1[0]+(c2[0]-c1[0])*t,g=c1[1]+(c2[1]-c1[1])*t,b2=c1[2]+(c2[2]-c1[2])*t;
+    const endDist=Math.min(t,1-t),taper=Math.min(endDist*10,1);
+    const w=width*0.5,alpha=taper*0.55;
+    verts.push(p[0]+bn[0]*w,p[1]+bn[1]*w,p[2]+bn[2]*w,norm[0],norm[1],norm[2],r,g,b2,alpha,-1);
+    verts.push(p[0]-bn[0]*w,p[1]-bn[1]*w,p[2]-bn[2]*w,norm[0],norm[1],norm[2],r,g,b2,alpha,1);
+  }
+  return new Float32Array(verts);
+}
+
+const ribbonDefs=[
+  {phase:0,wobble:0.35,c1:[0.98,0.57,0.24],c2:[0.96,0.62,0.04],width:1.6},
+  {phase:Math.PI*2/3,wobble:0.40,c1:[0.96,0.62,0.04],c2:[0.85,0.65,0.12],width:0.5},
+  {phase:Math.PI*4/3,wobble:0.30,c1:[0.85,0.65,0.12],c2:[0.98,0.57,0.24],width:1.0},
+  {phase:Math.PI*1/3,wobble:0.25,c1:[0.98,0.57,0.24],c2:[0.78,0.42,0.38],width:0.3},
+  {phase:Math.PI,wobble:0.45,c1:[0.96,0.62,0.04],c2:[0.98,0.57,0.24],width:0.7},
+];
+
+const start=performance.now();
+
+function drawScene(gl,p,proj,view,time){
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniformMatrix4fv(p.uProj,false,proj);
+  gl.uniformMatrix4fv(p.uView,false,view);
+  ribbonDefs.forEach(def=>{
+    const data=buildRibbon(def.phase,def.wobble,def.c1,def.c2,def.width,time);
+    gl.bindBuffer(gl.ARRAY_BUFFER,p.buf);
+    gl.bufferData(gl.ARRAY_BUFFER,data,gl.DYNAMIC_DRAW);
+    const stride=11*4;
+    gl.enableVertexAttribArray(p.aPos);gl.vertexAttribPointer(p.aPos,3,gl.FLOAT,false,stride,0);
+    gl.enableVertexAttribArray(p.aNormal);gl.vertexAttribPointer(p.aNormal,3,gl.FLOAT,false,stride,3*4);
+    gl.enableVertexAttribArray(p.aCol);gl.vertexAttribPointer(p.aCol,4,gl.FLOAT,false,stride,6*4);
+    gl.enableVertexAttribArray(p.aEdge);gl.vertexAttribPointer(p.aEdge,1,gl.FLOAT,false,stride,10*4);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,(SEGS+1)*2);
+  });
+}
+
+function frame(){
+  const time=(performance.now()-start)/1000;
+  const W=crispCanvas.width,H=crispCanvas.height;
+  const proj=perspective(Math.PI/4,W/H,0.1,100);
+  const camAngle=time*0.25;
+  const camTilt=Math.sin(time*0.13)*0.35+0.25;
+  const camRoll=Math.sin(time*0.09)*0.1;
+  const view=mat4Mul(mat4Trans(0,0,-6),mat4Mul(mat4RotZ(camRoll),mat4Mul(mat4RotX(camTilt),mat4RotY(camAngle))));
+  drawScene(glCrisp,pCrisp,proj,view,time);
+  drawScene(glGlow,pGlow,proj,view,time);
+  requestAnimationFrame(frame);
+}
+frame();
+})();
+</script>
+</body>
+</html>

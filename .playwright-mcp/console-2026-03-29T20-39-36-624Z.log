@@ -1,0 +1,8 @@
+[     356ms] TypeError: Assignment to constant variable.
+    at http://localhost:50697/:234:7
+    at buildRibbon (http://localhost:50697/:148:15)
+    at http://localhost:50697/:309:18
+    at Array.forEach (<anonymous>)
+    at draw (http://localhost:50697/:308:14)
+    at http://localhost:50697/:329:1
+[     372ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:50697/favicon.ico:0

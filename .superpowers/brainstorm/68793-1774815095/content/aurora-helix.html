@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Helix</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#111; font-family:-apple-system,sans-serif; }
+  .label {
+    text-align:center; padding:14px; font-size:12px;
+    letter-spacing:0.12em; color:rgba(255,255,255,0.45);
+    text-transform:uppercase; background:rgba(0,0,0,0.4);
+  }
+  .hero {
+    position:relative; width:100%; height:420px;
+    background:#1a1a1a; overflow:hidden;
+  }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .content {
+    position:absolute; inset:0; z-index:10;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px;
+  }
+  .avatar {
+    width:52px; height:52px; border-radius:50%; background:#fb923c;
+    box-shadow:0 0 0 3px #1a1a1a,0 0 0 5px #fb923c,0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .name { font-size:36px; font-weight:700; letter-spacing:0.04em; color:#fff; }
+  .sub  { font-size:12px; color:rgba(255,255,255,0.5); letter-spacing:0.15em; text-transform:uppercase; }
+  .note {
+    text-align:center; padding:16px; font-size:12px;
+    color:rgba(255,255,255,0.4); letter-spacing:0.06em; background:#0d0d0d;
+  }
+  .note span { color:rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora helix — 3D rotating ribbons · warm palette</div>
+
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="content">
+    <div class="avatar"></div>
+    <div class="name">Derek Montgomery</div>
+    <div class="sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  Parametric <span>3D helix</span> · perspective projection · Y-axis rotation · screen blend
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Three ribbon strands, evenly phased around the helix
+const strands = [
+  { phase: 0,              colors: [[251,146,60],  [245,158,11]]  },  // orange→amber
+  { phase: Math.PI*2/3,    colors: [[245,158,11],  [236,72,153]]  },  // amber→pink
+  { phase: Math.PI*4/3,    colors: [[236,72,153],  [251,146,60]]  },  // pink→orange
+];
+
+const FOCAL  = 900;
+const TURNS  = 2.2;
+const SEGS   = 180;  // segments per strand
+
+// Rotate a point around the Y axis
+function rotY(x, y, z, a) {
+  return {
+    x: x * Math.cos(a) + z * Math.sin(a),
+    y: y,
+    z: -x * Math.sin(a) + z * Math.cos(a),
+  };
+}
+
+// Perspective project to screen
+function project(p, cx, cy) {
+  const depth = FOCAL + p.z;
+  if (depth < 1) return null;
+  const s = FOCAL / depth;
+  return { sx: cx + p.x * s, sy: cy + p.y * s, s };
+}
+
+// Interpolate between two RGB colors
+function lerpColor(c1, c2, t) {
+  return [
+    c1[0] + (c2[0]-c1[0])*t | 0,
+    c1[1] + (c2[1]-c1[1])*t | 0,
+    c1[2] + (c2[2]-c1[2])*t | 0,
+  ];
+}
+
+const start = performance.now();
+
+function draw(now) {
+  const W = canvas.width, H = canvas.height;
+  const t = (now - start) / 1000;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Global slow Y-axis rotation
+  const rot = t * 0.18;
+
+  // Helix geometry — tall enough to overshoot canvas top/bottom
+  const R     = Math.min(W, H) * 0.52;
+  const pitch = H * 1.1 / TURNS;
+
+  // Center the helix slightly right of middle, like Stripe
+  const cx = W * 0.62;
+  const cy = H * 0.5;
+
+  // Collect all quads across all strands for depth sorting
+  const quads = [];
+
+  strands.forEach(strand => {
+    for (let i = 0; i < SEGS; i++) {
+      const ta = (i       / SEGS) * TURNS * Math.PI * 2;
+      const tb = ((i + 1) / SEGS) * TURNS * Math.PI * 2;
+
+      // 3D helix points (local space, Y is vertical)
+      const lya = (i       / SEGS - 0.5) * pitch * TURNS;
+      const lyb = ((i + 1) / SEGS - 0.5) * pitch * TURNS;
+
+      const pa3 = { x: R * Math.cos(ta + strand.phase), y: lya, z: R * Math.sin(ta + strand.phase) };
+      const pb3 = { x: R * Math.cos(tb + strand.phase), y: lyb, z: R * Math.sin(tb + strand.phase) };
+
+      // Rotate
+      const ra = rotY(pa3.x, pa3.y, pa3.z, rot);
+      const rb = rotY(pb3.x, pb3.y, pb3.z, rot);
+
+      // Project
+      const pa = project(ra, cx, cy);
+      const pb = project(rb, cx, cy);
+      if (!pa || !pb) continue;
+
+      // Screen-space perpendicular for ribbon width
+      const dx = pb.sx - pa.sx, dy = pb.sy - pa.sy;
+      const len = Math.sqrt(dx*dx + dy*dy) || 1;
+      const ribbonW = 26;
+      const nx = (-dy / len) * ribbonW * pa.s;
+      const ny = ( dx / len) * ribbonW * pa.s;
+      const nx2 = (-dy / len) * ribbonW * pb.s;
+      const ny2 = ( dx / len) * ribbonW * pb.s;
+
+      // Color along strand length
+      const frac = i / SEGS;
+      const col  = lerpColor(strand.colors[0], strand.colors[1], frac);
+
+      // Depth-based alpha (closer = more opaque)
+      const depthAlpha = Math.min(pa.s * 0.9, 0.88);
+
+      // Average z for depth sort
+      const avgZ = (ra.z + rb.z) * 0.5;
+
+      quads.push({
+        avgZ,
+        x0: pa.sx + nx,  y0: pa.sy + ny,
+        x1: pb.sx + nx2, y1: pb.sy + ny2,
+        x2: pb.sx - nx2, y2: pb.sy - ny2,
+        x3: pa.sx - nx,  y3: pa.sy - ny,
+        col, alpha: depthAlpha,
+      });
+    }
+  });
+
+  // Depth sort — far to near
+  quads.sort((a, b) => a.avgZ - b.avgZ);
+
+  // Draw
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  quads.forEach(q => {
+    ctx.globalAlpha = q.alpha * 0.72;
+    ctx.beginPath();
+    ctx.moveTo(q.x0, q.y0);
+    ctx.lineTo(q.x1, q.y1);
+    ctx.lineTo(q.x2, q.y2);
+    ctx.lineTo(q.x3, q.y3);
+    ctx.closePath();
+    ctx.fillStyle = `rgb(${q.col[0]},${q.col[1]},${q.col[2]})`;
+    ctx.fill();
+  });
+  ctx.restore();
+
+  requestAnimationFrame(draw);
+}
+
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

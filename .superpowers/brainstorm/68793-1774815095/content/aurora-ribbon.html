@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Ribbons</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; font-family: -apple-system, sans-serif; }
+  .label {
+    text-align: center; padding: 14px; font-size: 12px;
+    letter-spacing: 0.12em; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; background: rgba(0,0,0,0.4);
+  }
+  .hero {
+    position: relative; width: 100%; height: 380px;
+    background: #1a1a1a; overflow: hidden;
+  }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .content {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%; background: #fb923c;
+    box-shadow: 0 0 0 3px #1a1a1a, 0 0 0 5px #fb923c, 0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .name { font-size: 36px; font-weight: 700; letter-spacing: 0.04em; color: #fff; }
+  .sub { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.15em; text-transform: uppercase; }
+  .note {
+    text-align: center; padding: 16px; font-size: 12px;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.06em; background: #0d0d0d;
+  }
+  .note span { color: rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora ribbons — Stripe-style · warm palette</div>
+
+<div class="hero">
+  <canvas id="c"></canvas>
+  <div class="content">
+    <div class="avatar"></div>
+    <div class="name">Derek Montgomery</div>
+    <div class="sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  Canvas bezier ribbons · <span>screen blend</span> · slowly rotating control points
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Each ribbon: two bezier paths forming a thick filled shape
+// Control points orbit slowly at different speeds/radii
+const ribbons = [
+  {
+    color1: [251, 146, 60],   // orange
+    color2: [245, 158, 11],   // amber
+    width: 220,
+    // anchor + control point orbits: [cx, cy, rx, ry, speed, phase]
+    pts: [
+      { ax: 0.05, ay: 0.55,  cx1: 0.35, cy1:-0.15, cx2: 0.65, cy2: 0.45, ex: 1.0, ey: 0.2,
+        orb1: { rx:0.06, ry:0.08, spd:0.00038, ph:0 },
+        orb2: { rx:0.08, ry:0.06, spd:0.00031, ph:1.8 } },
+    ],
+    alpha: 0.75,
+    speed: 0.00022,
+  },
+  {
+    color1: [236, 72, 153],   // pink
+    color2: [251, 146, 60],   // orange
+    width: 180,
+    pts: [
+      { ax: -0.05, ay: 0.15, cx1: 0.3, cy1: 0.85, cx2: 0.7, cy2:-0.05, ex: 1.05, ey: 0.65,
+        orb1: { rx:0.07, ry:0.10, spd:0.00029, ph:2.5 },
+        orb2: { rx:0.09, ry:0.05, spd:0.00041, ph:0.8 } },
+    ],
+    alpha: 0.65,
+    speed: 0.00018,
+  },
+  {
+    color1: [245, 158, 11],   // amber
+    color2: [236, 72, 153],   // pink
+    width: 150,
+    pts: [
+      { ax: 0.2, ay: -0.05, cx1: 0.45, cy1: 0.9, cx2: 0.55, cy2: 0.1, ex: 0.85, ey: 1.05,
+        orb1: { rx:0.10, ry:0.07, spd:0.00035, ph:4.0 },
+        orb2: { rx:0.06, ry:0.09, spd:0.00026, ph:1.2 } },
+    ],
+    alpha: 0.55,
+    speed: 0.00026,
+  },
+];
+
+const start = performance.now();
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function drawRibbon(r, t, W, H) {
+  const p = r.pts[0];
+
+  // Animate control points in slow orbital paths
+  const cx1 = (p.cx1 + Math.sin(t * p.orb1.spd * 1000 + p.orb1.ph) * p.orb1.rx) * W;
+  const cy1 = (p.cy1 + Math.cos(t * p.orb1.spd * 1000 + p.orb1.ph) * p.orb1.ry) * H;
+  const cx2 = (p.cx2 + Math.sin(t * p.orb2.spd * 1000 + p.orb2.ph) * p.orb2.rx) * W;
+  const cy2 = (p.cy2 + Math.cos(t * p.orb2.spd * 1000 + p.orb2.ph) * p.orb2.ry) * H;
+
+  const ax = p.ax * W, ay = p.ay * H;
+  const ex = p.ex * W, ey = p.ey * H;
+
+  // Perpendicular offset for ribbon thickness
+  const dx = ex - ax, dy = ey - ay;
+  const len = Math.sqrt(dx*dx + dy*dy) || 1;
+  const nx = -dy / len * r.width * 0.5;
+  const ny =  dx / len * r.width * 0.5;
+
+  // Build closed ribbon shape: top edge bezier, bottom edge bezier (reversed)
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = r.alpha;
+
+  ctx.beginPath();
+  ctx.moveTo(ax + nx, ay + ny);
+  ctx.bezierCurveTo(cx1 + nx, cy1 + ny, cx2 + nx, cy2 + ny, ex + nx, ey + ny);
+  ctx.lineTo(ex - nx, ey - ny);
+  ctx.bezierCurveTo(cx2 - nx, cy2 - ny, cx1 - nx, cy1 - ny, ax - nx, ay - ny);
+  ctx.closePath();
+
+  // Gradient along the ribbon length
+  const grad = ctx.createLinearGradient(ax, ay, ex, ey);
+  const [r1,g1,b1] = r.color1;
+  const [r2,g2,b2] = r.color2;
+  grad.addColorStop(0,   `rgba(${r1},${g1},${b1},1)`);
+  grad.addColorStop(0.5, `rgba(${lerp(r1,r2,0.5)|0},${lerp(g1,g2,0.5)|0},${lerp(b1,b2,0.5)|0},1)`);
+  grad.addColorStop(1,   `rgba(${r2},${g2},${b2},1)`);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Soft glow blur pass (wider, lower alpha)
+  ctx.globalAlpha = r.alpha * 0.4;
+  ctx.filter = 'blur(18px)';
+  ctx.fill();
+  ctx.filter = 'none';
+
+  ctx.restore();
+}
+
+function draw(now) {
+  const t = now - start;
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  ribbons.forEach(r => drawRibbon(r, t, W, H));
+
+  requestAnimationFrame(draw);
+}
+
+requestAnimationFrame(draw);
+</script>
+
+</body>
+</html>

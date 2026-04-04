@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Ribbons v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; font-family: -apple-system, sans-serif; }
+  .label {
+    text-align: center; padding: 14px; font-size: 12px;
+    letter-spacing: 0.12em; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; background: rgba(0,0,0,0.4);
+  }
+  .hero {
+    position: relative; width: 100%; height: 380px;
+    background: #1a1a1a; overflow: hidden;
+  }
+  /* Two canvases: blurred glow behind, crisp ribbons on top */
+  .c-glow {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    filter: blur(28px);
+    z-index: 0;
+  }
+  .c-crisp {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 1;
+  }
+  .content {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%; background: #fb923c;
+    box-shadow: 0 0 0 3px #1a1a1a, 0 0 0 5px #fb923c, 0 0 28px 4px rgba(251,146,60,0.4);
+  }
+  .name { font-size: 36px; font-weight: 700; letter-spacing: 0.04em; color: #fff; }
+  .sub { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.15em; text-transform: uppercase; }
+  .note {
+    text-align: center; padding: 16px; font-size: 12px;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.06em; background: #0d0d0d;
+  }
+  .note span { color: rgba(251,146,60,0.8); }
+</style>
+</head>
+<body>
+
+<div class="label">Aurora ribbons v2 — smooth · warm palette</div>
+
+<div class="hero">
+  <canvas class="c-glow" id="glow"></canvas>
+  <canvas class="c-crisp" id="crisp"></canvas>
+  <div class="content">
+    <div class="avatar"></div>
+    <div class="name">Derek Montgomery</div>
+    <div class="sub">Senior Software Engineer</div>
+  </div>
+</div>
+
+<div class="note">
+  Two-canvas approach · <span>CSS blur</span> on glow layer · no per-frame filter calls
+</div>
+
+<script>
+const glowCanvas  = document.getElementById('glow');
+const crispCanvas = document.getElementById('crisp');
+const gCtx = glowCanvas.getContext('2d');
+const cCtx = crispCanvas.getContext('2d');
+
+function resize() {
+  const W = glowCanvas.offsetWidth;
+  const H = glowCanvas.offsetHeight;
+  glowCanvas.width  = crispCanvas.width  = W;
+  glowCanvas.height = crispCanvas.height = H;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Ribbons defined as 4 independent animated control points
+// Each point oscillates: base + sin/cos orbit
+const ribbons = [
+  {
+    // orange → amber sweep
+    c1: [251, 146, 60], c2: [245, 158, 11],
+    thickness: 0.28, // fraction of height
+    alpha: 0.82,
+    // Top bezier: start → cp1 → cp2 → end  (all as fractions of W/H)
+    top:  { sx:-.05, sy:.18,  cp1x:.32, cp1y:-.12, cp2x:.68, cp2y:.38,  ex:1.05, ey:.12 },
+    // Bottom bezier (reversed):
+    bot:  { sx:-.05, sy:.46,  cp1x:.30, cp1y:.08,  cp2x:.70, cp2y:.56,  ex:1.05, ey:.40 },
+    // Orbital animations per control point [rx, ry, speed, phase]
+    anim: {
+      top_cp1: { rx:.06, ry:.08, spd:.00028, ph:0.0 },
+      top_cp2: { rx:.08, ry:.06, spd:.00022, ph:1.8 },
+      bot_cp1: { rx:.07, ry:.05, spd:.00025, ph:3.2 },
+      bot_cp2: { rx:.05, ry:.09, spd:.00031, ph:0.9 },
+    }
+  },
+  {
+    // pink → orange sweep
+    c1: [236, 72, 153], c2: [251, 146, 60],
+    thickness: 0.24,
+    alpha: 0.70,
+    top:  { sx:-.05, sy:.55,  cp1x:.28, cp1y:.20,  cp2x:.72, cp2y:.80,  ex:1.05, ey:.48 },
+    bot:  { sx:-.05, sy:.80,  cp1x:.30, cp1y:.42,  cp2x:.70, cp2y:.96,  ex:1.05, ey:.72 },
+    anim: {
+      top_cp1: { rx:.08, ry:.07, spd:.00021, ph:2.5 },
+      top_cp2: { rx:.06, ry:.08, spd:.00033, ph:4.1 },
+      bot_cp1: { rx:.09, ry:.06, spd:.00027, ph:1.3 },
+      bot_cp2: { rx:.07, ry:.07, spd:.00019, ph:5.0 },
+    }
+  },
+  {
+    // amber → pink sweep
+    c1: [245, 158, 11], c2: [236, 72, 153],
+    thickness: 0.20,
+    alpha: 0.60,
+    top:  { sx:.10,  sy:-.05, cp1x:.40, cp1y:.60,  cp2x:.60, cp2y:-.10, ex:.90,  ey:.70 },
+    bot:  { sx:.10,  sy:.18,  cp1x:.38, cp1y:.78,  cp2x:.62, cp2y:.10,  ex:.90,  ey:.90 },
+    anim: {
+      top_cp1: { rx:.07, ry:.09, spd:.00030, ph:1.0 },
+      top_cp2: { rx:.09, ry:.06, spd:.00024, ph:3.6 },
+      bot_cp1: { rx:.06, ry:.08, spd:.00026, ph:2.2 },
+      bot_cp2: { rx:.08, ry:.07, spd:.00035, ph:0.5 },
+    }
+  }
+];
+
+const start = performance.now();
+
+function orbit(base, anim, t, scale) {
+  return base + Math.sin(t * anim.spd + anim.ph) * anim.rx * scale;
+}
+function orbitY(base, anim, t, scale) {
+  return base + Math.cos(t * anim.spd + anim.ph) * anim.ry * scale;
+}
+
+function drawRibbon(ctx, r, t) {
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  const a = r.anim;
+
+  // Compute animated control points
+  const tcp1x = orbit(r.top.cp1x, a.top_cp1, t, W);
+  const tcp1y = orbitY(r.top.cp1y, a.top_cp1, t, H);
+  const tcp2x = orbit(r.top.cp2x, a.top_cp2, t, W);
+  const tcp2y = orbitY(r.top.cp2y, a.top_cp2, t, H);
+
+  const bcp1x = orbit(r.bot.cp1x, a.bot_cp1, t, W);
+  const bcp1y = orbitY(r.bot.cp1y, a.bot_cp1, t, H);
+  const bcp2x = orbit(r.bot.cp2x, a.bot_cp2, t, W);
+  const bcp2y = orbitY(r.bot.cp2y, a.bot_cp2, t, H);
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = r.alpha;
+
+  ctx.beginPath();
+  // Top edge
+  ctx.moveTo(r.top.sx * W, r.top.sy * H);
+  ctx.bezierCurveTo(tcp1x, tcp1y, tcp2x, tcp2y, r.top.ex * W, r.top.ey * H);
+  // Right cap
+  ctx.lineTo(r.bot.ex * W, r.bot.ey * H);
+  // Bottom edge reversed
+  ctx.bezierCurveTo(bcp2x, bcp2y, bcp1x, bcp1y, r.bot.sx * W, r.bot.sy * H);
+  ctx.closePath();
+
+  // Gradient along ribbon
+  const grad = ctx.createLinearGradient(r.top.sx * W, 0, r.top.ex * W, 0);
+  const [r1,g1,b1] = r.c1;
+  const [r2,g2,b2] = r.c2;
+  grad.addColorStop(0,   `rgb(${r1},${g1},${b1})`);
+  grad.addColorStop(1,   `rgb(${r2},${g2},${b2})`);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function draw(now) {
+  const t = now - start;
+  const W = glowCanvas.width, H = glowCanvas.height;
+
+  gCtx.clearRect(0, 0, W, H);
+  cCtx.clearRect(0, 0, W, H);
+
+  ribbons.forEach(r => {
+    drawRibbon(gCtx, r, t);   // blurred glow layer
+    drawRibbon(cCtx, r, t);   // crisp detail layer
+  });
+
+  requestAnimationFrame(draw);
+}
+
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

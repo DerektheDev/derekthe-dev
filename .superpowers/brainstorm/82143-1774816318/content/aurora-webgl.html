@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora — WebGL</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1a1a1a; font-family:'Bebas Neue',sans-serif; overflow:hidden; }
+  canvas#aurora {
+    position:fixed; inset:0; width:100vw; height:100vh;
+  }
+  .overlay {
+    position:fixed; inset:0; z-index:10;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:12px;
+    pointer-events:none;
+  }
+  .avatar {
+    width:64px; height:64px; border-radius:50%; background:#fb923c;
+    box-shadow:0 0 0 4px #1a1a1a,0 0 0 6px #fb923c,0 0 32px 6px rgba(251,146,60,0.45);
+  }
+  .name {
+    font-size:48px; font-weight:400; letter-spacing:0.04em; color:#fff;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5);
+  }
+  .sub {
+    font-family:-apple-system,sans-serif; font-size:13px;
+    color:rgba(255,255,255,0.55); letter-spacing:0.18em; text-transform:uppercase;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="aurora"></canvas>
+<div class="overlay">
+  <div class="avatar"></div>
+  <div class="name">Derek Montgomery</div>
+  <div class="sub">Senior Software Engineer</div>
+</div>
+
+<script>
+// ─── WebGL Setup ───────────────────────────────────────────
+const canvas = document.getElementById('aurora');
+const gl = canvas.getContext('webgl');
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  canvas.width  = window.innerWidth  * dpr;
+  canvas.height = window.innerHeight * dpr;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── Shaders ───────────────────────────────────────────────
+const vsSource = `
+  attribute vec2 a_pos;
+  void main() {
+    gl_Position = vec4(a_pos, 0.0, 1.0);
+  }
+`;
+
+const fsSource = `
+  precision highp float;
+  uniform float u_time;
+  uniform vec2  u_res;
+
+  // ── Simplex 3D noise (Ashima Arts) ──
+  vec3 mod289(vec3 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+  vec4 mod289(vec4 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+  float snoise(vec3 v) {
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0,0.5,1.0,2.0);
+    vec3 i = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + C.yyy;
+    vec3 x3 = x0 - D.yyy;
+    i = mod289(i);
+    vec4 p = permute(permute(permute(
+      i.z + vec4(0.0, i1.z, i2.z, 1.0))
+      + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+      + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 0.142857142857;
+    vec3 ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ * ns.x + ns.yyyy;
+    vec4 y = y_ * ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+    vec3 p0 = vec3(a0.xy, h.x);
+    vec3 p1 = vec3(a0.zw, h.y);
+    vec3 p2 = vec3(a1.xy, h.z);
+    vec3 p3 = vec3(a1.zw, h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+  }
+
+  // ── Fractal Brownian Motion ──
+  float fbm(vec3 p) {
+    float v = 0.0;
+    float a = 0.5;
+    vec3 shift = vec3(100.0);
+    for (int i = 0; i < 4; i++) {
+      v += a * snoise(p);
+      p = p * 2.0 + shift;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  // ── 3D rotation matrix (Y axis) ──
+  mat3 rotateY(float a) {
+    float c = cos(a), s = sin(a);
+    return mat3(c,0,s, 0,1,0, -s,0,c);
+  }
+
+  // ── 3D rotation matrix (X axis) ──
+  mat3 rotateX(float a) {
+    float c = cos(a), s = sin(a);
+    return mat3(1,0,0, 0,c,-s, 0,s,c);
+  }
+
+  // ── Warm palette ──
+  vec3 orange = vec3(0.984, 0.573, 0.235);  // #fb923c
+  vec3 amber  = vec3(0.961, 0.620, 0.043);  // #f59e0b
+  vec3 pink   = vec3(0.925, 0.282, 0.600);  // #ec4899
+
+  void main() {
+    vec2 uv = gl_FragCoord.xy / u_res;
+    uv.x *= u_res.x / u_res.y; // aspect ratio fix
+
+    float t = u_time * 0.08;
+
+    // Center and scale
+    vec2 p = (uv - vec2(0.5 * u_res.x/u_res.y, 0.5)) * 3.0;
+
+    // Create a 3D coordinate that rotates over time
+    vec3 coord = vec3(p, 0.0);
+    coord = rotateY(t * 0.7) * coord;
+    coord = rotateX(t * 0.3) * coord;
+
+    // ── Warp the coordinates with noise for organic flow ──
+    float warp1 = fbm(coord * 0.8 + vec3(t * 0.4, 0.0, t * 0.2));
+    float warp2 = fbm(coord * 0.6 + vec3(0.0, t * 0.3, t * 0.5));
+    coord.xy += vec2(warp1, warp2) * 0.6;
+
+    // ── Define three ribbon layers using noise ──
+    // Each ribbon is a narrow band in noise-space, creating flowing shapes
+    float n1 = fbm(coord * 1.2 + vec3(0.0,   t * 0.5, 0.0));
+    float n2 = fbm(coord * 1.0 + vec3(3.5,   t * 0.4, 2.0));
+    float n3 = fbm(coord * 1.1 + vec3(7.0,   t * 0.6, 4.5));
+
+    // Shape each into a ribbon (narrow bright band using smoothstep)
+    float ribbon1 = smoothstep(0.0, 0.08, abs(n1)) * smoothstep(0.35, 0.05, abs(n1));
+    float ribbon2 = smoothstep(0.0, 0.08, abs(n2 - 0.1)) * smoothstep(0.35, 0.05, abs(n2 - 0.1));
+    float ribbon3 = smoothstep(0.0, 0.08, abs(n3 + 0.1)) * smoothstep(0.35, 0.05, abs(n3 + 0.1));
+
+    // ── Helical twist: modulate ribbons with a rotating phase ──
+    float helix = atan(p.y, p.x) + t * 2.0;
+    float twist = sin(helix * 1.5 + coord.z * 2.0);
+    ribbon1 *= smoothstep(-0.2, 0.3, twist);
+    ribbon2 *= smoothstep(-0.3, 0.2, -twist);
+    ribbon3 *= smoothstep(-0.1, 0.4, sin(helix * 1.5 + 2.094 + coord.z * 2.0));
+
+    // ── Color each ribbon ──
+    vec3 col = vec3(0.0);
+    col += orange * ribbon1 * 1.4;
+    col += amber  * ribbon2 * 1.2;
+    col += pink   * ribbon3 * 1.3;
+
+    // Screen blend approximation (additive on dark bg works similarly)
+    // Add subtle overall glow from noise field
+    float glow = fbm(coord * 0.5 + vec3(t * 0.2)) * 0.08;
+    col += orange * glow * 0.3;
+
+    // Vignette to keep edges dark
+    float vig = 1.0 - smoothstep(0.3, 1.1, length(uv - vec2(0.5 * u_res.x/u_res.y, 0.5)));
+    col *= vig;
+
+    // Tone mapping for richness
+    col = col / (col + 0.8);
+
+    // Final output
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+// ─── Compile & Link ────────────────────────────────────────
+function createShader(type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(s));
+    gl.deleteShader(s);
+    return null;
+  }
+  return s;
+}
+
+const vs = createShader(gl.VERTEX_SHADER, vsSource);
+const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+const prog = gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+  console.error(gl.getProgramInfoLog(prog));
+}
+gl.useProgram(prog);
+
+// ─── Full-screen quad ──────────────────────────────────────
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const aPos = gl.getAttribLocation(prog, 'a_pos');
+gl.enableVertexAttribArray(aPos);
+gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+// ─── Uniforms ──────────────────────────────────────────────
+const uTime = gl.getUniformLocation(prog, 'u_time');
+const uRes  = gl.getUniformLocation(prog, 'u_res');
+
+// ─── Render Loop ───────────────────────────────────────────
+const start = performance.now();
+
+function draw() {
+  const t = (performance.now() - start) / 1000;
+  gl.uniform1f(uTime, t);
+  gl.uniform2f(uRes, canvas.width, canvas.height);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

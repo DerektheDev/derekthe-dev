@@ -1,0 +1,3 @@
+[   93705ms] ReferenceError: mat4RotZ is not defined
+    at frame (http://localhost:50697/:336:24)
+    at http://localhost:50697/:343:1
