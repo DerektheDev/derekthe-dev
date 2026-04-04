@@ -8,7 +8,7 @@ import styles from "./Hero.module.css";
 
 export default function Hero() {
   return (
-    <div className={`relative ${styles.heroOuter}`}>
+    <div className={styles.heroOuter}>
       <AuroraBackground />
       <NeuralBackground />
       <div className="mesh-bg">
@@ -17,29 +17,29 @@ export default function Hero() {
         <div className={`blob ${styles.blob3}`} />
         <div className={`blob ${styles.blob4}`} />
       </div>
-      <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section className={styles.section}>
 
-        <div className={`rise d2 mx-auto mb-10 relative ${styles.photoWrapper}`}>
-          <div className="w-full h-full rounded-full overflow-hidden photo-ring">
-            <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
+        <div className={`rise d2 ${styles.photoWrapper}`}>
+          <div className={`photo-ring ${styles.photoRingContainer}`}>
+            <Image src={derek} alt="Derek Montgomery" width={148} height={148} className={styles.photo} priority />
           </div>
         </div>
 
         <div>
-          <p className="rise d3 text-[22px] text-orange-400 tracking-[0.12em] mb-3">
+          <p className={`rise d3 ${styles.greeting}`}>
             Hey, I'm
           </p>
 
-          <h1 className="rise d4 hero-name text-white mb-6">
+          <h1 className={`rise d4 hero-name ${styles.heroName}`}>
             Derek Montgomery
           </h1>
 
-          <p className="rise d5 text-[20px] text-gray-400 mb-5 leading-relaxed">
+          <p className={`rise d5 ${styles.role}`}>
             Senior Software Engineer at{" "}
-            <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className="text-gray-200 font-medium hover:text-orange-400 transition-colors">O'Reilly Media</a>
+            <a href="https://www.oreilly.com/" target="_blank" rel="noreferrer" className={styles.oreillyLink}>O'Reilly Media</a>
           </p>
 
-          <div className="rise d5 tech-row my-9">
+          <div className={`rise d5 tech-row ${styles.techRow}`}>
             {techStack.map(({ label, iconUrl, faIcon }) => (
               <span key={label} className="tech-item">
                 {iconUrl
@@ -51,15 +51,15 @@ export default function Hero() {
             ))}
           </div>
 
-          <p className="rise d6 text-[15px] text-gray-400 leading-relaxed max-w-xl mx-auto mb-10">
-            With over <span className="text-gray-200 font-medium">15 years</span> building digital products, I've got experience{" "}
-            <span className="text-gray-200 font-medium">leading</span> engineering teams,{" "}
-            <span className="text-gray-200 font-medium">building</span> startups, and{" "}
-            <span className="text-gray-200 font-medium">consulting</span> for large corporations.
+          <p className={`rise d6 ${styles.bio}`}>
+            With over <span className={styles.highlight}>15 years</span> building digital products, I've got experience{" "}
+            <span className={styles.highlight}>leading</span> engineering teams,{" "}
+            <span className={styles.highlight}>building</span> startups, and{" "}
+            <span className={styles.highlight}>consulting</span> for large corporations.
           </p>
 
-          <div className="rise d6 flex gap-4 justify-center">
-            <a href="/resume" className="btn-fill text-[15px] px-8 py-3 rounded-lg tracking-wide">
+          <div className={`rise d6 ${styles.buttonRow}`}>
+            <a href="/resume" className={`btn-fill ${styles.resumeBtn}`}>
               View Resume
             </a>
           </div>
