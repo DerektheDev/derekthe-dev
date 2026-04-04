@@ -4,21 +4,22 @@ import derek from "../../public/derek-linkedin.jpg";
 import { techStack } from "../../data/home-data";
 import AuroraBackground from "./AuroraBackground";
 import NeuralBackground from "./NeuralBackground";
+import styles from "./Hero.module.css";
 
 export default function Hero() {
   return (
-    <div className="relative" style={{ overflow: 'hidden' }}>
+    <div className={`relative ${styles.heroOuter}`}>
       <AuroraBackground />
       <NeuralBackground />
       <div className="mesh-bg">
-        <div className="blob" style={{ width:520, height:520, top:'5%',  left:'20%', background:'rgba(251,146,60,0.22)', animation:'b1 14s ease-in-out infinite' }} />
-        <div className="blob" style={{ width:400, height:400, top:'30%', left:'55%', background:'rgba(234,88,12,0.18)',  animation:'b2 18s ease-in-out infinite' }} />
-        <div className="blob" style={{ width:460, height:360, top:'50%', left:'10%', background:'rgba(249,115,22,0.15)', animation:'b3 22s ease-in-out infinite' }} />
-        <div className="blob" style={{ width:340, height:340, top:'10%', left:'65%', background:'rgba(180,50,10,0.18)',  animation:'b4 16s ease-in-out infinite' }} />
+        <div className={`blob ${styles.blob1}`} />
+        <div className={`blob ${styles.blob2}`} />
+        <div className={`blob ${styles.blob3}`} />
+        <div className={`blob ${styles.blob4}`} />
       </div>
       <section className="relative z-10 max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
 
-        <div className="rise d2 mx-auto mb-10 relative" style={{ width: 148, height: 148 }}>
+        <div className={`rise d2 mx-auto mb-10 relative ${styles.photoWrapper}`}>
           <div className="w-full h-full rounded-full overflow-hidden photo-ring">
             <Image src={derek} alt="Derek Montgomery" width={148} height={148} className="object-cover w-full h-full" priority />
           </div>
