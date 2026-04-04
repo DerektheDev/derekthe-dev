@@ -4,7 +4,6 @@ import Nav from "./home/Nav";
 import Hero from "./home/Hero";
 import WorkCards from "./home/WorkCards";
 import Footer from "./home/Footer";
-import "../styles/home.css";
 
 function useScrollProgress() {
   const [progress, setProgress] = useState(0);

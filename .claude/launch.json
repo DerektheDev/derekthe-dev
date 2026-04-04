@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "Next.js Dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "export PATH=/usr/local/bin:/Users/dmontgomery/.nvm/versions/node/v24.13.0/bin:$PATH && npx next dev --webpack"],
       "port": 3000,
       "autoPort": true
     }
