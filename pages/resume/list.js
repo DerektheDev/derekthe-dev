@@ -1,16 +1,18 @@
+import styles from "./list.module.css";
+
 const List = ({ title = "Default", entries = [] }) => {
   const firstHalf = entries.slice(0, Math.floor(entries.length / 2));
   const secondHalf = entries.slice(Math.floor(entries.length / 2));
 
   return (
     <div>
-      <h2 className="text-3xl font-normal mb-2">{title}</h2>
-      <div className="grid grid-cols-1 gap-x-4 gap-y-2 font-light md:grid-cols-2">
+      <h2 className={styles.title}>{title}</h2>
+      <div className={styles.grid}>
         {[firstHalf, secondHalf].map((entries, halfIndex) => {
           return (
-            <ul key={halfIndex} className="flex flex-col gap-y-2">
+            <ul key={halfIndex} className={styles.column}>
               {entries.map((entry, i) => (
-                <li key={i} className="leading-5">
+                <li key={i} className={styles.item}>
                   {entry}
                 </li>
               ))}
