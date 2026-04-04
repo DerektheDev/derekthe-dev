@@ -1,0 +1,95 @@
+.sectionLabel {
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  color: #ccc;
+  text-align: center;
+  margin-bottom: 2rem;
+  margin-top: 4rem;
+}
+
+.card {
+  background: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease var(--delay, 0s),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Added by IntersectionObserver when card enters viewport */
+.appeared {
+  opacity: 1;
+  transform: none;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.appeared:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: #444;
+}
+
+.appeared:hover .cardAccent {
+  filter: brightness(1.15);
+}
+
+.cardAccent {
+  height: 100px;
+  background: var(--accent);
+  position: relative;
+  transition: filter 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardName {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.cardBody {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.55;
+  margin-bottom: 10px;
+  flex: 1;
+}
+
+.cardTags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 12px;
+  background: #2a2a2a;
+  color: #aaa;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.05em;
+}
