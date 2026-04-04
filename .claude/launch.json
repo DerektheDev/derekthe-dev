@@ -4,9 +4,14 @@
     {
       "name": "Next.js Dev",
       "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": ["-c", "export PATH=/usr/local/bin:/Users/dmontgomery/.nvm/versions/node/v24.13.0/bin:$PATH && npx next dev --webpack"],
-      "port": 3000,
-      "autoPort": true
+      "runtimeArgs": ["-c", "export PATH=/Users/dmontgomery/.nvm/versions/node/v24.13.0/bin:$PATH && npm run dev -- --no-turbopack"],
+      "port": 3000
+    },
+    {
+      "name": "Next.js Production",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "export PATH=/Users/dmontgomery/.nvm/versions/node/v24.13.0/bin:$PATH && npm run build && npm run start"],
+      "port": 3000
     }
   ]
 }

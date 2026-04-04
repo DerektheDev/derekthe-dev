@@ -1,3 +1,4 @@
+import Head from "next/head";
 import List from "./list";
 import ShortList from "./short-list";
 import KeyPoint from "./key-point";
@@ -15,7 +16,11 @@ import Header from "./header";
 
 export default function Resume() {
   return (
-    <main className="max-w-screen-lg mx-auto px-6 md:px-12 mt-12 screen:my-12">
+    <>
+      <Head>
+        <style>{`html { background-color: white; }`}</style>
+      </Head>
+      <main className="max-w-screen-lg mx-auto px-6 md:px-12 mt-12 screen:my-12 bg-white text-gray-900">
       <Header />
       <section className="grid gap-x-10 gap-y-4 grid-cols-1 md:grid-cols-2">
         <div className="shrink-0 flex flex-col gap-6 justify-between">
@@ -36,5 +41,6 @@ export default function Resume() {
         </div>
       </section>
     </main>
+    </>
   );
 }
