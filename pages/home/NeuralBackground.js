@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import styles from "./NeuralBackground.module.css";
 
 export default function NeuralBackground() {
   const canvasRef = useRef(null);
@@ -150,7 +151,7 @@ export default function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}
+      className={styles.canvas}
     />
   );
 }
