@@ -19,7 +19,7 @@ export default function Resume() {
   return (
     <>
       <Head>
-        <style>{`html { background-color: white; }`}</style>
+        <style>{`html, body { background-color: white !important; color: #111 !important; }`}</style>
       </Head>
       <main className={styles.main}>
         <Header />
