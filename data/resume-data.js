@@ -6,9 +6,8 @@ export const jobs = [
     dateRange: ["2023", "Present"],
     location: "Remote",
     bullets: [
-      "Contributed extensively to the design, development, and success of multiple AI initiatives, including O'Reilly content-powered Answers and custom RAG-based assistants",
-      "Most Impactful for the Business (Runner Up), Best Engineering (Runner Up) - 2024 Winter Hackathon",
-      // "Early-adopter & presenter on the use of Artificial Intelligence in daily work",
+      "Built O'Reilly Answers end-to-end — a content-powered conversational AI that surfaces expert guidance across O'Reilly's global learning catalog — along with multiple production RAG-based assistants",
+      "Designed and shipped AI infrastructure across the stack: a parent/child skill architecture, MCP tooling integrations, Claude Code subagent pipelines, and a RabbitMQ-to-Pub/Sub migration monitoring system",
     ]
   },
   {
@@ -19,8 +18,7 @@ export const jobs = [
     dateRange: ["2022"],
     location: "Remote",
     bullets: [
-      "Feature-built for Dispatch Connect, a logistics platform used by organizations to manage their own fleet",
-      "Route planning, optimization, visualization; real-time ETAs; status notifications; driver insights, comms",
+      "Feature-built Dispatch Connect, an enterprise logistics platform for fleet operators — delivering route planning and optimization, real-time ETA tracking, driver performance insights, and status notification systems",
     ],
   },
   {
@@ -30,8 +28,8 @@ export const jobs = [
     dateRange: ["2020", "2022"],
     location: "Remote",
     bullets: [
-      "Led and mentored fifteen individual contributors of the Front-End Development department of iFIT",
-      "Collaborated with project and team leads to cultivate a consistently high-performing FED force",
+      "Led and mentored fifteen individual contributors across the Front-End Development department, maintaining consistent delivery cadence across multiple concurrent product lines",
+      "Partnered with project and team leads to build an engineering culture with strong retention and high output",
       // "Ensured iFIT served the needs of its people in personal growth as much as they support the company in its goals",
     ],
   },
@@ -55,9 +53,8 @@ export const jobs = [
     dateRange: ["2016", "2018"],
     location: "Remote",
     bullets: [
-      "Lead developer for API architecture, banking network integration, payment processing, security, cron systems, Twilio integration, and admin portal",
-      // "Technical liaison to multiple 3rd party payment facilitators",
-      "Laid foundation for a growing and thriving company",
+      "Architected Gyve's fintech platform: banking network integrations, PCI-compliant payment processing, secure API design, automated cron systems, Twilio communications layer, and admin portal",
+      "Built the technical foundation that enabled the company to grow and sustain operations through today",
     ],
   },
   {
@@ -67,8 +64,7 @@ export const jobs = [
     dateRange: ["2015"],
     location: "Remote",
     bullets: [
-      "Feature-built for ZipTours, an app for remote home tours all over the country",
-      "Led WebRTC, telephony/SMS integration, custom scheduling system, and data-driven mapping efforts",
+      "Led development of ZipTours, a nationwide platform for remote home tours, including WebRTC video conferencing, telephony/SMS integration, a custom scheduling engine, and geo-mapped property search",
     ],
   },
 ];

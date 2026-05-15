@@ -49,6 +49,10 @@ const Header = () => (
         Partnering with high-standards individuals to build beautiful,
         performant, accessible, and exciting software with humans in mind.
       </p>
+      <p className={styles.focus}>
+        Currently focused on AI infrastructure, agentic systems, and production
+        AI product development.
+      </p>
     </section>
     <div className={styles.photoContainer}>
       <div className={styles.photoBorder}>
