@@ -10,21 +10,18 @@ export default function Nav() {
       </a>
       <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
         className={styles.linkWithIcon}
-        aria-label="LinkedIn (opens in new tab)">
+        aria-label="LinkedIn profile (opens in new tab)">
         <FontAwesomeIcon icon={faLinkedinIn} className={styles.icon} />
-        LinkedIn
       </a>
       <a href="https://github.com/derekthedev" target="_blank" rel="noreferrer"
         className={styles.linkWithIcon}
-        aria-label="GitHub (opens in new tab)">
+        aria-label="GitHub profile (opens in new tab)">
         <FontAwesomeIcon icon={faGithub} className={styles.icon} />
-        GitHub
       </a>
       <a href="https://www.threads.com/@derekthedev" target="_blank" rel="noreferrer"
         className={styles.linkWithIcon}
-        aria-label="Threads (opens in new tab)">
+        aria-label="Threads profile (opens in new tab)">
         <FontAwesomeIcon icon={faThreads} className={styles.icon} />
-        Threads
       </a>
     </nav>
   );
