@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLinkedinIn, faGithub } from "@fortawesome/free-brands-svg-icons";
+import { faLinkedinIn, faGithub, faThreads } from "@fortawesome/free-brands-svg-icons";
 import styles from "./Nav.module.css";
 
 export default function Nav() {
@@ -19,6 +19,12 @@ export default function Nav() {
         aria-label="GitHub (opens in new tab)">
         <FontAwesomeIcon icon={faGithub} className={styles.icon} />
         GitHub
+      </a>
+      <a href="https://www.threads.com/@derekthedev" target="_blank" rel="noreferrer"
+        className={styles.linkWithIcon}
+        aria-label="Threads (opens in new tab)">
+        <FontAwesomeIcon icon={faThreads} className={styles.icon} />
+        Threads
       </a>
     </nav>
   );
