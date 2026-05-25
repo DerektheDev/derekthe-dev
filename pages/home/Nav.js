@@ -8,9 +8,6 @@ export default function Nav() {
       <a href="/resume" className={styles.link}>
         Resume
       </a>
-      <a href="/editors" className={styles.link}>
-        Editors
-      </a>
       <a href="https://www.linkedin.com/in/derekthedev/" target="_blank" rel="noreferrer"
         className={styles.linkWithIcon}
         aria-label="LinkedIn profile (opens in new tab)">

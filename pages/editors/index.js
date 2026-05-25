@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import Nav from "../home/Nav";
 import Footer from "../home/Footer";
@@ -57,16 +57,97 @@ const editors = [
 
 const STATUS_LABEL = { chosen: "Chosen", tried: "Tried", forced: "Forced" };
 
-export default function Editors() {
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let rafId;
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const el = document.documentElement;
+        const scrolled = el.scrollTop || document.body.scrollTop;
+        const total = el.scrollHeight - el.clientHeight;
+        setProgress(total > 0 ? scrolled / total : 0);
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+  return progress;
+}
+
+function EraSection({ era, delay }) {
+  const sectionRef = useRef(null);
   const [open, setOpen] = useState(new Set());
 
-  function toggle(key) {
+  useEffect(() => {
+    const cards = sectionRef.current?.querySelectorAll(`.${styles.card}`);
+    if (!cards) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(styles.appeared);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  function toggle(name) {
     setOpen((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      next.has(name) ? next.delete(name) : next.add(name);
       return next;
     });
   }
+
+  return (
+    <section ref={sectionRef} className={styles.eraSection}>
+      <p className={styles.eraLabel}>
+        <span>{era.era}</span>
+        <span className={styles.eraYears}>{era.years}</span>
+      </p>
+      <div className={styles.cardList}>
+        {era.items.map((item, i) => {
+          const isOpen = open.has(item.name);
+          return (
+            <button
+              key={item.name}
+              className={styles.card}
+              style={{ "--delay": `${(delay + i) * 0.07}s` }}
+              onClick={() => toggle(item.name)}
+              aria-expanded={isOpen}
+            >
+              <div className={styles.cardTop}>
+                <span className={styles.cardName}>{item.name}</span>
+                <div className={styles.cardTags}>
+                  <span className={styles.tag}>{item.type}</span>
+                  <span className={`${styles.tag} ${styles[item.status]}`}>
+                    {STATUS_LABEL[item.status]}
+                  </span>
+                </div>
+                <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}>›</span>
+              </div>
+              {isOpen && (
+                <p className={styles.note}>{item.note}</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+export default function Editors() {
+  const scrollProgress = useScrollProgress();
 
   return (
     <>
@@ -80,66 +161,30 @@ export default function Editors() {
       </Head>
 
       <div className={`page-wrap space-mono ${styles.pageWrap}`}>
+        <div className={styles.progressBar} style={{ "--progress": scrollProgress }} />
         <div className={styles.ambientGlow} />
+
         <Nav />
 
-        <main className={styles.main}>
-          <header className={`rise d1 ${styles.header}`}>
-            <h1 className={styles.title}>Editors</h1>
-            <p className={styles.tagline}>~15 years · 16 tools · one career</p>
-          </header>
+        <div className={`rise d2 ${styles.heroSection}`}>
+          <p className={styles.greeting}>A personal record of</p>
+          <h1 className={`hero-name ${styles.heroName}`}>Editors</h1>
+          <p className={styles.tagline}>~15 years · 16 tools · one career</p>
+        </div>
 
-          <div className={`rise d2 ${styles.legend}`}>
-            <span className={`${styles.badge} ${styles.chosen}`}>Chosen</span>
-            <span className={`${styles.badge} ${styles.tried}`}>Tried</span>
-            <span className={`${styles.badge} ${styles.forced}`}>Forced</span>
-          </div>
+        <div className={styles.legendRow}>
+          <span className={`${styles.tag} ${styles.chosen}`}>Chosen</span>
+          <span className={`${styles.tag} ${styles.tried}`}>Tried</span>
+          <span className={`${styles.tag} ${styles.forced}`}>Forced</span>
+        </div>
 
-          <div className={`rise d3 ${styles.timeline}`}>
-            {editors.map((era) => (
-              <div key={era.era} className={styles.era}>
-                <div className={styles.eraHeader}>
-                  <span className={styles.eraName}>{era.era}</span>
-                  <span className={styles.eraYears}>{era.years}</span>
-                </div>
-
-                <div className={styles.items}>
-                  {era.items.map((item) => {
-                    const key = `${era.era}::${item.name}`;
-                    const isOpen = open.has(key);
-                    return (
-                      <div key={item.name} className={styles.itemWrap}>
-                        <div className={styles.dotCol}>
-                          <div className={`${styles.dot} ${styles[item.status + "Dot"]}`} />
-                          <div className={styles.stem} />
-                        </div>
-                        <button
-                          className={`${styles.item} ${isOpen ? styles.itemOpen : ""}`}
-                          onClick={() => toggle(key)}
-                          aria-expanded={isOpen}
-                        >
-                          <div className={styles.itemRow}>
-                            <span className={styles.itemName}>{item.name}</span>
-                            <div className={styles.badges}>
-                              <span className={styles.typeBadge}>{item.type}</span>
-                              <span className={`${styles.badge} ${styles[item.status]}`}>
-                                {STATUS_LABEL[item.status]}
-                              </span>
-                            </div>
-                            <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}>›</span>
-                          </div>
-                          {isOpen && (
-                            <p className={styles.note}>{item.note}</p>
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
+        {editors.map((era, i) => (
+          <EraSection
+            key={era.era}
+            era={era}
+            delay={i * 2}
+          />
+        ))}
 
         <Footer />
       </div>
