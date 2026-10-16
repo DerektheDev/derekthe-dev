@@ -10,7 +10,7 @@ import {
   brands,
   // interests,
   proficiencies,
-  industries,
+  // industries,
 } from "../../data/resume-data";
 import Header from "./header";
 import styles from "./index.module.css";
@@ -37,7 +37,7 @@ export default function Resume() {
             <List title="Skills & Competencies" entries={skills} />
             <List title="What I've Built" entries={built} />
             <List title="Brands Served" entries={brands} />
-            <List title="Industries Served" entries={industries} />
+            {/* <List title="Industries Served" entries={industries} />*/}
             {/* <ShortList title="Interests" entries={interests} /> */}
           </div>
         </section>
