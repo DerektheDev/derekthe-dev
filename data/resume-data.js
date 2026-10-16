@@ -32,15 +32,15 @@ export const jobs = [
       "Architected API, banking network integration, and PCI-compliant payment processing",
     ],
   },
-  {
-    title: "Marketplace Homes",
-    titleLink: "https://marketplacehomes.com/",
-    subtitle: "Lead Developer",
-    dateRange: ["2015"],
-    bullets: [
-      "Built ZipTours, a nationwide remote home-tour app with live WebRTC video, Twilio SMS/voice, and custom scheduling and mapping",
-    ],
-  },
+  // {
+  //   title: "Marketplace Homes",
+  //   titleLink: "https://marketplacehomes.com/",
+  //   subtitle: "Lead Developer",
+  //   dateRange: ["2015"],
+  //   bullets: [
+  //     "Built ZipTours, a nationwide remote home-tour app with live WebRTC video, Twilio SMS/voice, and custom scheduling and mapping",
+  //   ],
+  // },
   {
     title: "Perficient",
     titleLink: "https://perficient.com",
