@@ -5,8 +5,8 @@ export const jobs = [
     subtitle: "Senior Software Engineer, AI Team",
     dateRange: ["2023", "Present"],
     bullets: [
+      "Pitched AI in Content and led its front-end build, achieving 4.5x adoption, 1.6x engagement, and 5.6x upvotes versus its predecessor",
       "Improved Core Web Vitals of search client: LCP (54%), loading time (32%), FCP (58%), INP (46%), CLS (7%)",
-      "Led front-end build of AI in Content, with a 4.5x adoption rate, 1.6x engagement rate, and 5.6x upvote rate compared to its product predecessor",
       "Built agent-agnostic plugins and skills (Claude Code, Codex, Cursor) that documented and automated the team's manual weekly processes",
       "2024 O'Reilly Hackathon: Most Impactful for the Business (Runner Up), Best Engineering (Runner Up)",
     ],
