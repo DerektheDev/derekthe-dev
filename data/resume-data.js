@@ -24,11 +24,11 @@ export const jobs = [
   },
   {
     title: "Gyve",
-    titleLink: "https://gyve.com",
+    titleLink: "https://www.touchpointsoftware.com/gyve/",
     subtitle: "Co-Founder, Technical Lead",
     dateRange: ["2016", "2018"],
     bullets: [
-      "Built giving and payments platform acquired by Cass Information Systems in 2019",
+      "Built giving and payments platform acquired by Cass Information Systems in 2019; still in use today as TouchPoint Giving",
       "Architected API, banking network integration, and PCI-compliant payment processing",
     ],
   },
