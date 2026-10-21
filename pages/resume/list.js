@@ -1,8 +1,8 @@
 import styles from "./list.module.css";
 
 const List = ({ title = "Default", entries = [] }) => {
-  const firstHalf = entries.slice(0, Math.floor(entries.length / 2));
-  const secondHalf = entries.slice(Math.floor(entries.length / 2));
+  const firstHalf = entries.slice(0, Math.ceil(entries.length / 2));
+  const secondHalf = entries.slice(Math.ceil(entries.length / 2));
 
   return (
     <div>

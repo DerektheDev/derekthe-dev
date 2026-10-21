@@ -33,7 +33,7 @@ export default function Resume() {
           </div>
           <div className={styles.col}>
             <KeyPoint title="Education" entries={schools} />
-            <ShortList title="Tech" entries={proficiencies} />
+            <List title="Tech" entries={proficiencies} />
             <List title="Skills & Competencies" entries={skills} />
             <List title="What I've Built" entries={built} />
             <List title="Brands Served" entries={brands} />

@@ -87,8 +87,8 @@ export const brands = [
   "Caterpillar",
   "Cedars-Sinai",
   "Daimler",
+  "HCA Healthcare",
   "Herman Miller",
-  "Hospital Corporation of America (HCA)",
   "Kaiser Permanente",
   "Learning Care Group",
   "NordicTrack",
@@ -99,34 +99,37 @@ export const brands = [
 ];
 
 export const built = [
-  "RAG-based AI assistants",
-  "Agent Skills",
+  // Rendered as two columns: first half left, second half right
+  "RAG-powered AI assistants (UI & Python services)",
+  "Native platform integrations (Raycast, VS Code, Cursor)",
   "Design systems & component libraries",
   "Mobile apps (Expo, React Native)",
-  "Native platform integrations (Raycast, VS Code, Cursor)",
-  "WebRTC video, Twilio SMS/voice",
+  "Agent Skills",
   "PCI-compliant payment processing & banking network integrations",
   "Complex reporting & data aggregation systems",
+  "WebRTC video, Twilio SMS/voice",
   // "MCP Tooling"
 ];
 
 export const skills = [
-  "Agentic AI Development (Claude Code, Codex, Cursor, et al)",
+  "Agentic AI development",
   "People leadership",
   "Data visualization",
   "Performance optimization",
   "Web accessibility",
-  "Comprehensive unit/integration testing",
+  "Unit & integration testing",
 ];
 
 export const proficiencies = [
   "HTML, CSS, JavaScript",
   "TypeScript",
+  "React, Next.js",
+  "React Native, Expo",
+  "Jest, Cypress",
+  "Node",
   "Ruby on Rails",
   "Python, Django",
-  "React, Redux",
   // "SQL",
-  "React Native, Expo",
-  "Node",
+  "Anthropic & OpenAI APIs",
   "Datadog",
 ];
